@@ -33,7 +33,7 @@ pub fn header(text: impl Into<String>) -> impl Bundle {
     (
         Name::new("Header"),
         Text(text.into()),
-        TextFont::from_font_size(40.0),
+        TextFont::from_font_size(100.0),
         TextColor(HEADER_TEXT),
     )
 }
@@ -59,8 +59,8 @@ where
         text,
         action,
         Node {
-            width: px(380),
-            height: px(80),
+            width: px(260),
+            height: px(50),
             align_items: AlignItems::Center,
             justify_content: JustifyContent::Center,
             border_radius: BorderRadius::MAX,
@@ -119,7 +119,7 @@ where
                     children![(
                         Name::new("Button Text"),
                         Text(text),
-                        TextFont::from_font_size(40.0),
+                        TextFont::from_font_size(24.0),
                         TextColor(BUTTON_TEXT),
                         // Don't bubble picking events from the text up to the button.
                         Pickable::IGNORE,

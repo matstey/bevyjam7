@@ -13,3 +13,11 @@ Check out the [documentation](https://github.com/TheBevyFlock/bevy_new_2d/blob/m
 * No character. More screen based interactions.
 * Body temperature lowers the better you are doing.
     * High temp = louder/faster music and visual effects.
+
+##
+
+* Crate per mini game?
+* Load all assets on startup
+* Share assets between mini games
+* Just a start button
+* Volume mute

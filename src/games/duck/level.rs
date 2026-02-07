@@ -5,12 +5,16 @@ use bevy::prelude::*;
 use crate::{
     asset_tracking::LoadResource,
     audio::music,
-    demo::player::{PlayerAssets, player},
+    games::duck::{
+        GAME,
+        player::{PlayerAssets, player},
+    },
     screens::Screen,
 };
 
 pub(super) fn plugin(app: &mut App) {
     app.load_resource::<LevelAssets>();
+    app.add_systems(OnEnter(GAME), spawn);
 }
 
 #[derive(Resource, Asset, Clone, Reflect)]
@@ -29,8 +33,8 @@ impl FromWorld for LevelAssets {
     }
 }
 
-/// A system that spawns the main level.
-pub fn spawn_level(
+/// A system that spawns the level.
+pub fn spawn(
     mut commands: Commands,
     level_assets: Res<LevelAssets>,
     player_assets: Res<PlayerAssets>,
@@ -40,6 +44,7 @@ pub fn spawn_level(
         Name::new("Level"),
         Transform::default(),
         Visibility::default(),
+        DespawnOnExit(GAME),
         DespawnOnExit(Screen::Gameplay),
         children![
             player(400.0, &player_assets, &mut texture_atlas_layouts),
