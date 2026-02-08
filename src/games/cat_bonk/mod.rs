@@ -76,7 +76,7 @@ impl CatBonkState {
     /// Assuming that is what we want.
     pub fn reset(&mut self, start_time: Duration) {
         self.start_time = start_time;
-        self.run_time = Duration::from_secs(20);
+        self.run_time = Duration::from_secs(5);
 
         // todo: scale from difficulty
         self.target_count = 3;
@@ -133,7 +133,9 @@ pub fn spawn(
         .with_children(|parent| {
             // spawn cats at random locations
             for spawn_index in indices {
-                parent.spawn(cat::cat(&assets, cat_spawns[spawn_index]));
+                parent
+                    .spawn(cat::cat(&assets, cat_spawns[spawn_index]))
+                    .observe(cat::on_hit);
             }
         });
 
