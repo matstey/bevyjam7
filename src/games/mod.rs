@@ -56,6 +56,20 @@ pub enum GameControlMethod {
     //Keys(Vec<KeyCode>),
 }
 
+impl Display for GameControlMethod {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                Self::WASD => "WASD",
+                Self::Mouse => "Mouse",
+                Self::Keyboard => "Keyboard",
+            }
+        )
+    }
+}
+
 /// Global game state updated after each game completes
 #[derive(Debug, Default, Copy, Clone, Resource)]
 pub struct GameData {
@@ -149,7 +163,7 @@ fn spawn_next(
         };
 
         next_game.set(Game::PreGame);
-        game_data.apply_result(game.result, Duration::from_secs(5));
+        game_data.apply_result(game.result, Duration::from_secs(5)); // TODO: Actually time passed between games?
         next_game_state.set(GameState::PreGame(get_info(next_game_kind)));
 
         info!(

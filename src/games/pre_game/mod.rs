@@ -3,7 +3,7 @@ use std::time::Duration;
 use bevy::prelude::*;
 
 use crate::{
-    games::{Game, GameState},
+    games::{Game, GameInfo, GameState},
     screens::Screen,
     theme::widget,
 };
@@ -21,13 +21,15 @@ pub(super) fn plugin(app: &mut App) {
 #[derive(Debug, Default, Clone, Copy, Resource)]
 pub struct PreGameState {
     pub start_time: Duration,
+    pub info: GameInfo,
 }
 
 impl PreGameState {
     /// Called when starting this game to make sure the data is reset
     /// Assuming that is what we want.
-    pub fn reset(&mut self, start_time: Duration) {
+    pub fn reset(&mut self, start_time: Duration, info: GameInfo) {
         self.start_time = start_time;
+        self.info = info;
     }
 }
 
@@ -37,34 +39,40 @@ impl PreGameState {
 struct PreGameCountdown;
 
 /// A system to spawn the example level
-pub fn spawn(mut commands: Commands, mut state: ResMut<PreGameState>, time: Res<Time>) {
-    state.reset(time.elapsed());
+pub fn spawn(
+    mut commands: Commands,
+    mut state: ResMut<PreGameState>,
+    time: Res<Time>,
+    game_state: Res<State<GameState>>,
+) {
+    if let GameState::PreGame(info) = game_state.get() {
+        state.reset(time.elapsed(), info.clone());
 
-    commands.spawn((
-        widget::ui_root("Pre Game Level"),
-        DespawnOnExit(GAME), // When exiting this game despawn this entity
-        DespawnOnExit(Screen::Gameplay), // When exiting the top level game despawn this entity
-        children![
-            widget::header("Pre Game"),
-            (widget::label("0"), PreGameCountdown)
-        ],
-    ));
+        commands.spawn((
+            widget::ui_root("Pre Game Level"),
+            DespawnOnExit(GAME), // When exiting this game despawn this entity
+            DespawnOnExit(Screen::Gameplay), // When exiting the top level game despawn this entity
+            children![
+                widget::header(format!("Pre Game ({})", info.kind)),
+                (widget::label("0"), PreGameCountdown),
+                widget::label(format!("{}", info.controls)),
+            ],
+        ));
+    }
 }
 
 /// Just a simple system that transitions us to the next game after some time
 pub fn update(
     state: Res<PreGameState>,
     time: Res<Time>,
-    game_state: Res<State<GameState>>,
     mut next_game_state: ResMut<NextState<GameState>>,
     mut next_game: ResMut<NextState<Game>>,
 ) {
-    if let GameState::PreGame(info) = game_state.get() {
-        if time.elapsed() - state.start_time > COUNTDOWN {
-            next_game_state.set(GameState::Game(info.kind));
-            next_game.set(info.kind);
-            info!("Pre game completed. Starting {}", info.kind);
-        }
+    if time.elapsed() - state.start_time > COUNTDOWN {
+        let kind = state.info.kind;
+        next_game_state.set(GameState::Game(kind));
+        next_game.set(kind);
+        info!("Pre game completed. Starting {}", kind);
     }
 }
 
