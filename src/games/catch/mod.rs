@@ -126,7 +126,11 @@ pub fn spawn(
 /// Just a simple system that transitions us to the next game after some time
 pub fn update(state: Res<CatchState>, time: Res<Time>, mut tx: MessageWriter<NextGame>) {
     if time.elapsed() - state.start_time > state.run_time {
-        tx.write(NextGame::from_result(GameResult::Failed));
+        tx.write(NextGame::from_result(if state.caught > 3 {
+            GameResult::Passsed
+        } else {
+            GameResult::Failed
+        }));
         info!("Next game");
     }
 }

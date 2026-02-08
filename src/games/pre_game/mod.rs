@@ -4,6 +4,7 @@ use bevy::prelude::*;
 
 use crate::{
     AppSystems, PausableSystems,
+    asset_tracking::LoadResource,
     games::{
         Game, GameData, GameInfo, GameState,
         pre_game::control_method::{ControlMethodAssets, control_method},
@@ -20,6 +21,7 @@ mod hint;
 const GAME: Game = Game::Pre;
 
 pub(super) fn plugin(app: &mut App) {
+    app.load_resource::<PreGameAssets>();
     app.add_plugins((hint::plugin, control_method::plugin));
     app.add_systems(OnEnter(GAME), spawn);
     app.add_systems(
@@ -53,13 +55,32 @@ impl PreGameState {
 #[require(Text)]
 struct PreGameCountdown;
 
+/// Used to track all assets for this game
+#[derive(Resource, Asset, Clone, Reflect)]
+#[reflect(Resource)]
+pub struct PreGameAssets {
+    #[dependency]
+    background1: Handle<Image>,
+}
+
+impl FromWorld for PreGameAssets {
+    /// Load all assets we want for this game
+    fn from_world(world: &mut World) -> Self {
+        let assets = world.resource::<AssetServer>();
+        Self {
+            background1: assets.load("games/pre_game/background1.jpeg"),
+        }
+    }
+}
+
 /// A system to spawn the example level
 pub fn spawn(
     mut commands: Commands,
     mut state: ResMut<PreGameState>,
     time: Res<Time>,
     game_state: Res<State<GameState>>,
-    assets: Res<ControlMethodAssets>,
+    control_assets: Res<ControlMethodAssets>,
+    game_assets: Res<PreGameAssets>,
     data: Res<GameData>,
 ) {
     if let GameState::PreGame(info) = game_state.get() {
@@ -71,6 +92,7 @@ pub fn spawn(
             DespawnOnExit(Screen::Gameplay), // When exiting the top level game despawn this entity
             children![(
                 layout::grid_parent(),
+                ImageNode::new(game_assets.background1.clone()),
                 children![
                     (
                         layout::top_center(),
@@ -82,7 +104,7 @@ pub fn spawn(
                     ),
                     (
                         layout::bottom_left(),
-                        children![control_method(info.controls, &assets)]
+                        children![control_method(info.controls, &control_assets)]
                     ),
                     (
                         layout::top_left(),
