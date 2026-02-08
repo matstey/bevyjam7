@@ -122,10 +122,7 @@ pub fn spawn(
         widget::ui_root("CatBonk UI"),
         DespawnOnExit(GAME), // When exiting this game despawn this entity
         DespawnOnExit(Screen::Gameplay), // When exiting the top level game despawn this entity
-        children![
-            widget::header("BONK"),
-            (widget::label("0"), CatBonkCountdown)
-        ],
+        children![(widget::label("0"), CatBonkCountdown)],
     ));
 
     commands
@@ -164,6 +161,7 @@ pub const fn get_info() -> GameInfo {
     GameInfo {
         kind: GAME,
         controls: GameControlMethod::Mouse,
+        hint: "Bonk",
     }
 }
 

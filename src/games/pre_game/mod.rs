@@ -3,17 +3,28 @@ use std::time::Duration;
 use bevy::prelude::*;
 
 use crate::{
+    AppSystems, PausableSystems,
     games::{Game, GameInfo, GameState},
     screens::Screen,
     theme::widget,
 };
 
+mod balance;
+mod hint;
+
 const GAME: Game = Game::Pre;
 const COUNTDOWN: Duration = Duration::from_secs(5);
 
 pub(super) fn plugin(app: &mut App) {
+    app.add_plugins(hint::plugin);
     app.add_systems(OnEnter(GAME), spawn);
-    app.add_systems(Update, (update, update_countdown).run_if(in_state(GAME)));
+    app.add_systems(
+        Update,
+        (update, update_countdown)
+            .in_set(AppSystems::Update)
+            .in_set(PausableSystems)
+            .run_if(in_state(GAME)),
+    );
     app.init_resource::<PreGameState>();
 }
 

@@ -50,6 +50,7 @@ pub enum GameState {
 pub struct GameInfo {
     pub kind: Game,
     pub controls: GameControlMethod,
+    pub hint: &'static str,
 }
 
 #[allow(unused)]
