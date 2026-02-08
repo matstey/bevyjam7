@@ -21,3 +21,17 @@ Check out the [documentation](https://github.com/TheBevyFlock/bevy_new_2d/blob/m
 * Share assets between mini games
 * Just a start button
 * Volume mute
+* Lives
+    * 5 lives
+    * Scale between 37C and 42C. 42C == game over
+    * Games are pass or fail
+    * Failed game == 1 life lost
+    * Passed game life regained by .5
+* Pre game screen
+    * Display controls for next game
+    * Temperature/lives update
+    * Display round
+* Music
+    * All moving and pulsing things to be in tempo with music
+    * Layered tracks
+    * Tempo and aggression increase with rounds/time

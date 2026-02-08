@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::games::Game;
+use crate::games::{Game, GameControlMethod, GameInfo};
 
 mod animation;
 pub mod level;
@@ -16,4 +16,11 @@ pub(super) fn plugin(app: &mut App) {
         movement::plugin,
         player::plugin,
     ));
+}
+
+pub const fn get_info() -> GameInfo {
+    GameInfo {
+        kind: GAME,
+        controls: GameControlMethod::WASD,
+    }
 }

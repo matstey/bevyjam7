@@ -1,32 +1,133 @@
+use std::{fmt::Display, time::Duration};
+
 use bevy::prelude::*;
 
+mod balance;
 mod duck;
 mod example;
+mod pre_game;
 
-#[derive(States, Copy, Clone, Eq, PartialEq, Hash, Debug, Default)]
+#[derive(Debug, Default, Copy, Clone, Eq, PartialEq, Hash, States)]
 pub enum Game {
     #[default]
     None,
+    PreGame,
     Example,
     Duck,
 }
 
-#[derive(Debug, Default, Copy, Clone, Message)]
-pub struct NextGame;
+impl Display for Game {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                Game::None => "None",
+                Game::PreGame => "PreGame",
+                Game::Example => "Example",
+                Game::Duck => "Duck",
+            }
+        )
+    }
+}
+
+#[derive(Debug, Default, Copy, Clone, Eq, PartialEq, Hash, States)]
+pub enum GameState {
+    #[default]
+    None,
+    PreGame(GameInfo),
+    Game(Game),
+}
+
+/// Global game state updated after each game completes
+#[derive(Debug, Default, Copy, Clone, Eq, PartialEq, Hash)]
+pub struct GameInfo {
+    pub kind: Game,
+    pub controls: GameControlMethod,
+}
+
+#[allow(unused)]
+#[derive(Debug, Default, Copy, Clone, Eq, PartialEq, Hash)]
+pub enum GameControlMethod {
+    #[default]
+    WASD,
+    Mouse,
+    Keyboard,
+    //Keys(Vec<KeyCode>),
+}
+
+/// Global game state updated after each game completes
+#[derive(Debug, Default, Copy, Clone, Resource)]
+pub struct GameData {
+    pub health: f32,
+    pub round: u32,
+    pub elapsed: Duration,
+}
+
+impl GameData {
+    fn apply_result(&mut self, result: GameResult, delta: Duration) {
+        self.round += 1;
+        match result {
+            GameResult::Passsed => self.adjust_health(balance::PASSED_REWARD),
+            GameResult::Failed => self.adjust_health(-balance::FAILED_COST),
+        };
+        self.elapsed += delta;
+    }
+
+    fn adjust_health(&mut self, adjustment: f32) {
+        self.health = (self.health + adjustment).clamp(0.0, balance::MAX_HEALTH);
+    }
+}
+
+#[derive(Debug, Copy, Clone, Message)]
+pub struct NextGame {
+    pub result: GameResult,
+}
+
+impl NextGame {
+    pub fn from_result(result: GameResult) -> Self {
+        Self { result }
+    }
+}
+
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
+pub enum GameResult {
+    Passsed,
+    Failed,
+}
+
+impl Display for GameResult {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                Self::Passsed => "Passed",
+                Self::Failed => "Failed",
+            }
+        )
+    }
+}
 
 pub(super) fn plugin(app: &mut App) {
     app.init_state::<Game>();
+    app.init_state::<GameState>();
+    app.init_resource::<GameData>();
     app.add_message::<NextGame>();
     // Has to be in post update to make sure any request for the next level are processed before the next loop starts
     app.add_systems(PostUpdate, spawn_next);
 
     // Register all mini games here
-    app.add_plugins((example::plugin, duck::plugin));
+    app.add_plugins((pre_game::plugin, example::plugin, duck::plugin));
 }
 
 /// A system that triggers the first game to spawn
-pub fn spawn_first(mut next_level: ResMut<NextState<Game>>) {
-    next_level.set(Game::Example);
+pub fn spawn_first(
+    mut next_game: ResMut<NextState<Game>>,
+    mut next_game_state: ResMut<NextState<GameState>>,
+) {
+    next_game.set(Game::PreGame);
+    next_game_state.set(GameState::PreGame(get_info(Game::Example)));
 }
 
 /// A system that triggers the next game to spawn when a `NextGame` message is sent
@@ -34,14 +135,35 @@ pub fn spawn_first(mut next_level: ResMut<NextState<Game>>) {
 fn spawn_next(
     mut rx: MessageReader<NextGame>,
     game: Res<State<Game>>,
+    mut game_data: ResMut<GameData>,
     mut next_game: ResMut<NextState<Game>>,
+    mut next_game_state: ResMut<NextState<GameState>>,
 ) {
-    let current = game.get(); // Store the current game so we only every transition once but still process all messages
-    for _ in rx.read() {
-        next_game.set(match current {
+    let current = game.get().clone(); // Store the current game so we only every transition once but still process all messages
+    for game in rx.read() {
+        let next_game_kind = match current {
             Game::None => Game::Example,
             Game::Example => Game::Duck,
-            Game::Duck => Game::None,
-        });
+            Game::Duck => Game::Example,
+            Game::PreGame => todo!(), // If this get hit something has gone wrong
+        };
+
+        next_game.set(Game::PreGame);
+        game_data.apply_result(game.result, Duration::from_secs(5));
+        next_game_state.set(GameState::PreGame(get_info(next_game_kind)));
+
+        info!(
+            "Last game result {}. Next game {}.",
+            game.result, next_game_kind
+        );
+    }
+}
+
+const fn get_info(game: Game) -> GameInfo {
+    match game {
+        Game::None => todo!(),
+        Game::PreGame => todo!(), // If this get hit something has gone wrong
+        Game::Example => example::get_info(),
+        Game::Duck => duck::get_info(),
     }
 }

@@ -4,7 +4,7 @@ use bevy::prelude::*;
 
 use crate::{
     asset_tracking::LoadResource,
-    games::{Game, NextGame},
+    games::{Game, GameControlMethod, GameInfo, GameResult, NextGame},
     screens::Screen,
     theme::widget,
 };
@@ -23,6 +23,13 @@ pub(super) fn plugin(app: &mut App) {
 
     // Register a basic data structure that we can use to track data for this game
     app.init_resource::<ExampleState>();
+}
+
+pub const fn get_info() -> GameInfo {
+    GameInfo {
+        kind: GAME,
+        controls: GameControlMethod::WASD,
+    }
 }
 
 /// All data representing the current state of this game
@@ -87,7 +94,7 @@ pub fn spawn(
 /// Just a simple system that transitions us to the next game after some time
 pub fn update(state: Res<ExampleState>, time: Res<Time>, mut tx: MessageWriter<NextGame>) {
     if time.elapsed() - state.start_time > state.run_time {
-        tx.write(NextGame::default());
+        tx.write(NextGame::from_result(GameResult::Passsed));
         info!("Next game");
     }
 }
