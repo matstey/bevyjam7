@@ -4,17 +4,16 @@ use bevy::{
 
 const TRAUMA_DECAY_PER_SECOND: f32 = 0.5;
 const TRAUMA_EXPONENT: f32 = 2.0;
-const MAX_ANGLE: f32 = 10.0_f32.to_radians();
-const MAX_TRANSLATION: f32 = 20.0;
+const MAX_ANGLE: f32 = 5.0_f32.to_radians();
+const MAX_TRANSLATION: f32 = 10.0;
 const NOISE_SPEED: f32 = 20.0;
 
+// Camera shake plugin, mostly based on https://bevy.org/examples/camera/2d-screen-shake/
 pub(super) fn plugin(app: &mut App) {
     app.add_systems(PreUpdate, reset_transform);
     app.add_systems(PostUpdate, shake_camera.before(TransformSystems::Propagate));
 }
 
-/// Let's start with the core mechanic: how do we shake the camera?
-/// This system runs right at the end of the frame, so that we can sneak in the shake effect before rendering kicks in.
 fn shake_camera(
     camera_shake: Single<(&mut CameraShakeState, &CameraShakeConfig, &mut Transform)>,
     time: Res<Time>,
@@ -41,25 +40,18 @@ fn shake_camera(
     camera_shake.trauma = camera_shake.trauma.clamp(0.0, 1.0);
 }
 
-/// Restore the camera's transform to its unshaken state.
-/// Runs at the start of the frame, so that gameplay logic doesn't need to care about camera shake.
 fn reset_transform(camera_shake: Single<(&CameraShakeState, &mut Transform)>) {
     let (camera_shake, mut transform) = camera_shake.into_inner();
     *transform = camera_shake.original_transform;
 }
 
-/// The current state of the camera shake that is updated every frame.
 #[derive(Component, Debug, Default)]
 pub struct CameraShakeState {
     /// The current trauma level in [0.0, 1.0].
     pub trauma: f32,
-    /// The original transform of the camera before applying the shake.
-    /// We store this so that we can restore the camera's transform to its original state at the start of the next frame.
     original_transform: Transform,
 }
 
-/// Configuration for the camera shake.
-/// See the constants at the top of the file for some good default values and detailed explanations.
 #[derive(Component, Debug)]
 #[require(CameraShakeState)]
 pub struct CameraShakeConfig {
