@@ -8,6 +8,7 @@ mod catch;
 mod duck;
 mod example;
 mod pre_game;
+mod camera;
 
 #[derive(Debug, Default, Copy, Clone, Eq, PartialEq, Hash, States)]
 pub enum Game {

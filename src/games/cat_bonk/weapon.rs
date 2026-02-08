@@ -1,8 +1,7 @@
 use bevy::prelude::*;
 
 use crate::{
-    games::cat_bonk::{CatBonkAssets, GAME},
-    screens::Screen,
+    games::cat_bonk::CatBonkAssets,
 };
 
 #[derive(Debug, Default, Component)]
@@ -11,18 +10,20 @@ pub struct Weapon;
 pub fn weapon(assets: &CatBonkAssets) -> impl Bundle {
     (
         Name::new("weapon"),
-        Transform::from_xyz(0.0, 0.0, 10.0),
+        Transform::from_xyz(0.0, 0.0, 2.0),
         Visibility::default(),
-        DespawnOnExit(GAME),
-        DespawnOnExit(Screen::Gameplay),
-        Sprite::from_image(assets.weapon.clone()),
+        Sprite {
+            image: assets.weapon.clone(),
+            custom_size: Some(Vec2::new(160.0, 174.0)),
+            ..default()
+        },
         Weapon,
     )
 }
 
 pub fn update(
     mut weapon: Single<&mut Transform, With<Weapon>>,
-    camera_query: Single<(&Camera, &GlobalTransform)>,
+    camera_query: Single<(&Camera, &GlobalTransform), Without<IsDefaultUiCamera>>,
     window: Single<&Window>,
     buttons: Res<ButtonInput<MouseButton>>,
 ) {
@@ -31,7 +32,7 @@ pub fn update(
     if let Some(cursor_position) = window.cursor_position()
         && let Ok(cursor_world_pos) = camera.viewport_to_world_2d(camera_transform, cursor_position)
     {
-        let sprite_offset = Vec2 { x: -90.0, y: 50.0 };
+        let sprite_offset = Vec2 { x: -60.0, y: 50.0 };
         weapon.translation.x = cursor_world_pos.x + sprite_offset.x;
         weapon.translation.y = cursor_world_pos.y + sprite_offset.y;
     };

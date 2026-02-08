@@ -17,7 +17,9 @@ mod screens;
 mod theme;
 
 use bevy::{
+    app::HierarchyPropagatePlugin,
     asset::{AssetMetaCheck, load_internal_binary_asset},
+    camera::visibility::RenderLayers,
     prelude::*,
 };
 
@@ -30,7 +32,7 @@ pub struct AppPlugin;
 impl Plugin for AppPlugin {
     fn build(&self, app: &mut App) {
         // Add Bevy plugins.
-        app.add_plugins(
+        app.add_plugins((
             DefaultPlugins
                 .set(AssetPlugin {
                     // Wasm builds will check for meta files (that don't exist) if this isn't set.
@@ -48,7 +50,8 @@ impl Plugin for AppPlugin {
                     .into(),
                     ..default()
                 }),
-        );
+            HierarchyPropagatePlugin::<RenderLayers>::new(PostUpdate),
+        ));
 
         // Load this font as the default
         load_internal_binary_asset!(
@@ -115,5 +118,5 @@ struct Pause(pub bool);
 struct PausableSystems;
 
 fn spawn_camera(mut commands: Commands) {
-    commands.spawn((Name::new("Camera"), Camera2d));
+    commands.spawn((Name::new("Camera"), Camera2d, IsDefaultUiCamera));
 }

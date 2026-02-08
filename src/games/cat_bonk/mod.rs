@@ -2,13 +2,15 @@ use rand::seq::index;
 use std::time::Duration;
 
 use bevy::{
+    app::Propagate,
     image::{ImageLoaderSettings, ImageSampler},
     prelude::*,
+    camera::ScalingMode,
 };
 
 use crate::{
     asset_tracking::LoadResource,
-    games::{Game, GameControlMethod, GameInfo, GameResult, NextGame},
+    games::{Game, GameControlMethod, GameInfo, GameResult, NextGame, camera},
     screens::Screen,
     theme::widget,
 };
@@ -119,13 +121,31 @@ pub fn spawn(
     let indices = index::sample(&mut rng, cat_spawns.len(), state.target_count as usize);
 
     commands.spawn((
+        DespawnOnExit(GAME),             // When exiting this game despawn this entity
+        DespawnOnExit(Screen::Gameplay), // When exiting the top level game despawn this entity
+        Camera2d,
+        Camera {
+            order: -1,
+            clear_color: ClearColorConfig::None,
+            ..default()
+        },
+        Projection::from(OrthographicProjection {
+            scaling_mode: ScalingMode::FixedVertical {
+                viewport_height: 450.0
+            },
+            ..OrthographicProjection::default_2d()
+        }),
+        camera::RENDERLAYER_GAME,
+    ));
+
+    commands.spawn((
         widget::ui_root("CatBonk UI"),
         DespawnOnExit(GAME), // When exiting this game despawn this entity
         DespawnOnExit(Screen::Gameplay), // When exiting the top level game despawn this entity
         children![(widget::label("0"), CatBonkCountdown)],
     ));
 
-    commands
+    let level = commands
         .spawn(level::level(&assets))
         .with_children(|parent| {
             // spawn cats at random locations
@@ -134,10 +154,22 @@ pub fn spawn(
                     .spawn(cat::cat(&assets, &state, cat_spawns[spawn_index]))
                     .observe(cat::on_hit);
             }
-        });
+        })
+        .id();
 
     //Spawn weapon
-    commands.spawn(weapon::weapon(&assets));
+    let weapon = commands.spawn(weapon::weapon(&assets)).id();
+
+    commands
+        .spawn((
+            Name::new("root"),
+            Transform::default(),
+            Visibility::default(),
+            DespawnOnExit(GAME),
+            DespawnOnExit(Screen::Gameplay),
+            Propagate(camera::RENDERLAYER_GAME),
+        ))
+        .add_children(&[level, weapon]);
 }
 
 pub(super) fn plugin(app: &mut App) {

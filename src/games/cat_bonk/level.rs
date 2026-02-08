@@ -1,8 +1,5 @@
-use crate::{
-    games::cat_bonk::{CatBonkAssets, GAME},
-    screens::Screen,
-};
-use bevy::prelude::*;
+use crate::games::cat_bonk::CatBonkAssets;
+use bevy::{camera::visibility::RenderLayers, prelude::*};
 
 #[derive(Debug, Default, Component)]
 pub struct Background;
@@ -10,11 +7,10 @@ pub struct Background;
 pub fn level(assets: &CatBonkAssets) -> impl Bundle {
     (
         Name::new("background"),
-        Transform::from_scale(Vec3::splat(1.6)),
+        Transform::from_scale(Vec3::splat(1.0)),
         Visibility::default(),
-        DespawnOnExit(GAME),
-        DespawnOnExit(Screen::Gameplay),
         Sprite::from_image(assets.background.clone()),
+        RenderLayers::default(),
         Background,
     )
 }
