@@ -3,6 +3,7 @@ use std::time::Duration;
 use bevy::prelude::*;
 
 use crate::{
+    AppSystems, PausableSystems,
     asset_tracking::LoadResource,
     games::{Game, GameControlMethod, GameInfo, GameResult, NextGame},
     screens::Screen,
@@ -19,7 +20,13 @@ pub(super) fn plugin(app: &mut App) {
     app.add_systems(OnEnter(GAME), spawn);
 
     // Register all systems that are to be run when this game is active
-    app.add_systems(Update, (update, update_countdown).run_if(in_state(GAME)));
+    app.add_systems(
+        Update,
+        (update, update_countdown)
+            .in_set(AppSystems::Update)
+            .in_set(PausableSystems)
+            .run_if(in_state(GAME)),
+    );
 
     // Register a basic data structure that we can use to track data for this game
     app.init_resource::<ExampleState>();
@@ -66,7 +73,7 @@ impl FromWorld for ExampleAssets {
     fn from_world(world: &mut World) -> Self {
         let assets = world.resource::<AssetServer>();
         Self {
-            music: assets.load("audio/music/Fluffing A Duck.ogg"),
+            music: assets.load("games/duck/Fluffing A Duck.ogg"),
         }
     }
 }

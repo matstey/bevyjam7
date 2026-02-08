@@ -20,10 +20,15 @@ use crate::{AppSystems, PausableSystems};
 pub(super) fn plugin(app: &mut App) {
     app.add_systems(
         Update,
-        (apply_movement, apply_screen_wrap)
-            .chain()
-            .in_set(AppSystems::Update)
-            .in_set(PausableSystems),
+        (
+            record_player_directional_input
+                .in_set(AppSystems::RecordInput)
+                .in_set(PausableSystems),
+            (apply_movement, apply_screen_wrap)
+                .chain()
+                .in_set(AppSystems::Update)
+                .in_set(PausableSystems),
+        ),
     );
 }
 
@@ -32,7 +37,7 @@ pub(super) fn plugin(app: &mut App) {
 /// other players as well.
 #[derive(Component, Reflect)]
 #[reflect(Component)]
-pub struct MovementController {
+pub struct TopDownMovementController {
     /// The direction the character wants to move in.
     pub intent: Vec2,
 
@@ -41,7 +46,7 @@ pub struct MovementController {
     pub max_speed: f32,
 }
 
-impl Default for MovementController {
+impl Default for TopDownMovementController {
     fn default() -> Self {
         Self {
             intent: Vec2::ZERO,
@@ -53,7 +58,7 @@ impl Default for MovementController {
 
 fn apply_movement(
     time: Res<Time>,
-    mut movement_query: Query<(&MovementController, &mut Transform)>,
+    mut movement_query: Query<(&TopDownMovementController, &mut Transform)>,
 ) {
     for (controller, mut transform) in &mut movement_query {
         let velocity = controller.max_speed * controller.intent;
@@ -75,5 +80,34 @@ fn apply_screen_wrap(
         let position = transform.translation.xy();
         let wrapped = (position + half_size).rem_euclid(size) - half_size;
         transform.translation = wrapped.extend(transform.translation.z);
+    }
+}
+
+fn record_player_directional_input(
+    input: Res<ButtonInput<KeyCode>>,
+    mut controller_query: Query<&mut TopDownMovementController>,
+) {
+    // Collect directional input.
+    let mut intent = Vec2::ZERO;
+    if input.pressed(KeyCode::KeyW) || input.pressed(KeyCode::ArrowUp) {
+        intent.y += 1.0;
+    }
+    if input.pressed(KeyCode::KeyS) || input.pressed(KeyCode::ArrowDown) {
+        intent.y -= 1.0;
+    }
+    if input.pressed(KeyCode::KeyA) || input.pressed(KeyCode::ArrowLeft) {
+        intent.x -= 1.0;
+    }
+    if input.pressed(KeyCode::KeyD) || input.pressed(KeyCode::ArrowRight) {
+        intent.x += 1.0;
+    }
+
+    // Normalize intent so that diagonal movement is the same speed as horizontal / vertical.
+    // This should be omitted if the input comes from an analog stick instead.
+    let intent = intent.normalize_or_zero();
+
+    // Apply movement intent to controllers.
+    for mut controller in &mut controller_query {
+        controller.intent = intent;
     }
 }

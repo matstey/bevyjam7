@@ -9,6 +9,7 @@ mod audio;
 mod dev_tools;
 mod games;
 mod menus;
+mod movement;
 mod screens;
 mod theme;
 
@@ -53,6 +54,7 @@ impl Plugin for AppPlugin {
             screens::plugin,
             theme::plugin,
             games::plugin,
+            movement::plugin,
         ));
 
         // Order new `AppSystems` variants by adding them here:

@@ -3,6 +3,7 @@ use std::{fmt::Display, time::Duration};
 use bevy::prelude::*;
 
 mod balance;
+mod catch;
 mod duck;
 mod example;
 mod pre_game;
@@ -14,6 +15,7 @@ pub enum Game {
     PreGame,
     Example,
     Duck,
+    Catch,
 }
 
 impl Display for Game {
@@ -26,6 +28,7 @@ impl Display for Game {
                 Game::PreGame => "PreGame",
                 Game::Example => "Example",
                 Game::Duck => "Duck",
+                Game::Catch => "Catch",
             }
         )
     }
@@ -132,7 +135,12 @@ pub(super) fn plugin(app: &mut App) {
     app.add_systems(PostUpdate, spawn_next);
 
     // Register all mini games here
-    app.add_plugins((pre_game::plugin, example::plugin, duck::plugin));
+    app.add_plugins((
+        pre_game::plugin,
+        example::plugin,
+        duck::plugin,
+        catch::plugin,
+    ));
 }
 
 /// A system that triggers the first game to spawn
@@ -141,7 +149,7 @@ pub fn spawn_first(
     mut next_game_state: ResMut<NextState<GameState>>,
 ) {
     next_game.set(Game::PreGame);
-    next_game_state.set(GameState::PreGame(get_info(Game::Example)));
+    next_game_state.set(GameState::PreGame(get_info(Game::Catch)));
 }
 
 /// A system that triggers the next game to spawn when a `NextGame` message is sent
@@ -156,9 +164,10 @@ fn spawn_next(
     let current = game.get().clone(); // Store the current game so we only every transition once but still process all messages
     for game in rx.read() {
         let next_game_kind = match current {
-            Game::None => Game::Example,
-            Game::Example => Game::Duck,
+            Game::None => Game::Catch,
+            Game::Example => Game::Catch,
             Game::Duck => Game::Example,
+            Game::Catch => Game::Duck,
             Game::PreGame => todo!(), // If this get hit something has gone wrong
         };
 
@@ -179,5 +188,6 @@ const fn get_info(game: Game) -> GameInfo {
         Game::PreGame => todo!(), // If this get hit something has gone wrong
         Game::Example => example::get_info(),
         Game::Duck => duck::get_info(),
+        Game::Catch => catch::get_info(),
     }
 }
