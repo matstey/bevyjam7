@@ -8,7 +8,7 @@ use crate::{
     theme::widget,
 };
 
-const GAME: Game = Game::PreGame;
+const GAME: Game = Game::Pre;
 const COUNTDOWN: Duration = Duration::from_secs(5);
 
 pub(super) fn plugin(app: &mut App) {
@@ -46,7 +46,7 @@ pub fn spawn(
     game_state: Res<State<GameState>>,
 ) {
     if let GameState::PreGame(info) = game_state.get() {
-        state.reset(time.elapsed(), info.clone());
+        state.reset(time.elapsed(), *info);
 
         commands.spawn((
             widget::ui_root("Pre Game Level"),
