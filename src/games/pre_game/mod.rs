@@ -18,7 +18,6 @@ mod control_method;
 mod hint;
 
 const GAME: Game = Game::Pre;
-const COUNTDOWN: Duration = Duration::from_secs(5);
 
 pub(super) fn plugin(app: &mut App) {
     app.add_plugins((hint::plugin, control_method::plugin));
@@ -102,7 +101,7 @@ pub fn update(
     mut next_game_state: ResMut<NextState<GameState>>,
     mut next_game: ResMut<NextState<Game>>,
 ) {
-    if time.elapsed() - state.start_time > COUNTDOWN {
+    if time.elapsed() - state.start_time > balance::COUNTDOWN {
         let kind = state.info.kind;
         next_game_state.set(GameState::Game(kind));
         next_game.set(kind);
@@ -118,8 +117,8 @@ fn update_countdown(
 ) {
     for mut text in query.iter_mut() {
         let elapsed = time.elapsed() - state.start_time;
-        let countdown = if elapsed < COUNTDOWN {
-            (COUNTDOWN - elapsed).as_secs_f32().ceil() as u32
+        let countdown = if elapsed < balance::COUNTDOWN {
+            (balance::COUNTDOWN - elapsed).as_secs_f32().ceil() as u32
         } else {
             0
         };

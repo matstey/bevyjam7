@@ -5,7 +5,13 @@ use bevy::prelude::*;
 use crate::{
     AppSystems, PausableSystems,
     asset_tracking::LoadResource,
-    games::{Game, GameControlMethod, GameInfo, GameResult, NextGame, catch::glove::glove},
+    games::{
+        Game, GameControlMethod, GameInfo, GameResult, NextGame,
+        catch::{
+            ball::Ball,
+            glove::{Glove, glove},
+        },
+    },
     screens::Screen,
 };
 
@@ -25,7 +31,7 @@ pub(super) fn plugin(app: &mut App) {
     // Register all systems that are to be run when this game is active
     app.add_systems(
         Update,
-        (update, ball::spawn)
+        (update, ball::spawn, update_catch)
             .in_set(AppSystems::Update)
             .in_set(PausableSystems)
             .run_if(in_state(GAME)),
@@ -96,15 +102,22 @@ pub fn spawn(
     assets: Res<CatchAssets>,
     mut state: ResMut<CatchState>,
     time: Res<Time>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
     let root = commands
         .spawn((
-            Name::new("Catch Level"),
+            Name::new("catch_level"),
             Transform::default(),
             Visibility::default(),
             DespawnOnExit(GAME), // When exiting this game despawn this entity
             DespawnOnExit(Screen::Gameplay), // When exiting the top level game despawn this entity
-            children![glove(400.0, &assets),],
+            children![glove(
+                balance::GLOVE_SPEED,
+                &assets,
+                &mut meshes,
+                &mut materials
+            ),],
         ))
         .id();
     state.reset(time.elapsed(), root);
@@ -115,5 +128,26 @@ pub fn update(state: Res<CatchState>, time: Res<Time>, mut tx: MessageWriter<Nex
     if time.elapsed() - state.start_time > state.run_time {
         tx.write(NextGame::from_result(GameResult::Failed));
         info!("Next game");
+    }
+}
+
+pub fn update_catch(
+    mut commands: Commands,
+    mut state: ResMut<CatchState>,
+    ball_query: Query<(Entity, &Transform, &Ball)>,
+    glove_query: Query<(&Transform, &Glove)>,
+) {
+    for (glove_transform, glove) in glove_query.iter() {
+        for (ball_entity, ball_transform, ball) in ball_query.iter() {
+            let distance = (glove_transform.translation - ball_transform.translation).length();
+
+            if distance
+                < (glove.radius * glove_transform.scale.x) + (ball_transform.scale.x * ball.radius)
+            {
+                state.caught += 1;
+                commands.entity(ball_entity).despawn();
+                info!("Caught ball!",);
+            }
+        }
     }
 }
