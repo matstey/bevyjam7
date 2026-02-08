@@ -1,9 +1,7 @@
 use bevy::prelude::*;
 
-use crate::games::{
-    cat_bonk::CatBonkAssets,
-    camera::shake::CameraShakeState,
-};
+use crate::audio::sound_effect;
+use crate::games::{camera::shake::CameraShakeState, cat_bonk::CatBonkAssets};
 
 #[derive(Debug, Default, Component)]
 pub struct Weapon;
@@ -47,7 +45,13 @@ pub fn update(
     weapon.rotation = Quat::from_rotation_z(angle.to_radians());
 }
 
-pub fn update_weapon_hit(mut camera_shake: Single<&mut CameraShakeState>) {
-    camera_shake.trauma += 0.2;
+pub fn update_weapon_hit(
+    mut commands: Commands,
+    mut camera_shake: Single<&mut CameraShakeState>,
+    assets: Res<CatBonkAssets>,
+) {
+    camera_shake.trauma += 0.3;
     camera_shake.trauma = camera_shake.trauma.clamp(0.0, 1.0);
+
+    commands.spawn(sound_effect(assets.hit_sound.clone()));
 }

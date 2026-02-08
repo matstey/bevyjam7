@@ -2,7 +2,11 @@ use rand::seq::index;
 use std::time::Duration;
 
 use bevy::{
-    app::Propagate, camera::ScalingMode, image::{ImageLoaderSettings, ImageSampler}, input::common_conditions::input_just_pressed, prelude::*
+    app::Propagate,
+    camera::ScalingMode,
+    image::{ImageLoaderSettings, ImageSampler},
+    input::common_conditions::input_just_pressed,
+    prelude::*,
 };
 
 use crate::{
@@ -35,6 +39,7 @@ pub struct CatBonkAssets {
     background: Handle<Image>,
     weapon: Handle<Image>,
     cat: Handle<Image>,
+    hit_sound: Handle<AudioSource>,
 }
 
 impl FromWorld for CatBonkAssets {
@@ -60,6 +65,7 @@ impl FromWorld for CatBonkAssets {
                     settings.sampler = ImageSampler::nearest();
                 },
             ),
+            hit_sound: assets.load("games/cat/hit.ogg"),
         }
     }
 }

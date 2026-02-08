@@ -1,6 +1,4 @@
-use bevy::{
-    math::ops::powf, prelude::*,
-};
+use bevy::{math::ops::powf, prelude::*};
 
 const TRAUMA_DECAY_PER_SECOND: f32 = 0.5;
 const TRAUMA_EXPONENT: f32 = 2.0;

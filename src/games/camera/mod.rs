@@ -1,7 +1,4 @@
-use bevy::{
-    camera::visibility::RenderLayers,
-    prelude::*,
-};
+use bevy::{camera::visibility::RenderLayers, prelude::*};
 
 pub mod shake;
 
