@@ -14,6 +14,7 @@ use crate::{
     theme::widget,
 };
 
+mod balance;
 pub mod cat;
 pub mod level;
 pub mod weapon;
@@ -76,7 +77,7 @@ impl CatBonkState {
     /// Assuming that is what we want.
     pub fn reset(&mut self, start_time: Duration) {
         self.start_time = start_time;
-        self.run_time = Duration::from_secs(5);
+        self.run_time = Duration::from_secs(GAME_DURATION);
 
         // todo: scale from difficulty
         self.target_count = 3;
@@ -134,7 +135,7 @@ pub fn spawn(
             // spawn cats at random locations
             for spawn_index in indices {
                 parent
-                    .spawn(cat::cat(&assets, cat_spawns[spawn_index]))
+                    .spawn(cat::cat(&assets, &state, cat_spawns[spawn_index]))
                     .observe(cat::on_hit);
             }
         });
@@ -148,7 +149,14 @@ pub(super) fn plugin(app: &mut App) {
     app.add_systems(OnEnter(GAME), spawn);
     app.add_systems(
         Update,
-        (update, level::update, weapon::update, update_countdown).run_if(in_state(GAME)),
+        (
+            update,
+            level::update,
+            weapon::update,
+            cat::update,
+            update_countdown,
+        )
+            .run_if(in_state(GAME)),
     );
     app.init_resource::<CatBonkState>();
 }
