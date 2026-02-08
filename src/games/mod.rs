@@ -13,7 +13,7 @@ mod pre_game;
 pub enum Game {
     #[default]
     None,
-    PreGame,
+    Pre,
     Example,
     Duck,
     Catch,
@@ -27,7 +27,7 @@ impl Display for Game {
             "{}",
             match self {
                 Game::None => "None",
-                Game::PreGame => "PreGame",
+                Game::Pre => "PreGame",
                 Game::Example => "Example",
                 Game::Duck => "Duck",
                 Game::Catch => "Catch",
@@ -56,7 +56,7 @@ pub struct GameInfo {
 #[derive(Debug, Default, Copy, Clone, Eq, PartialEq, Hash)]
 pub enum GameControlMethod {
     #[default]
-    WASD,
+    Wasd,
     Mouse,
     Keyboard,
     //Keys(Vec<KeyCode>),
@@ -68,7 +68,7 @@ impl Display for GameControlMethod {
             f,
             "{}",
             match self {
-                Self::WASD => "WASD",
+                Self::Wasd => "WASD",
                 Self::Mouse => "Mouse",
                 Self::Keyboard => "Keyboard",
             }
@@ -152,7 +152,7 @@ pub fn spawn_first(
     mut next_game: ResMut<NextState<Game>>,
     mut next_game_state: ResMut<NextState<GameState>>,
 ) {
-    next_game.set(Game::PreGame);
+    next_game.set(Game::Pre);
     next_game_state.set(GameState::PreGame(get_info(Game::CatBonk)));
 }
 
@@ -165,7 +165,7 @@ fn spawn_next(
     mut next_game: ResMut<NextState<Game>>,
     mut next_game_state: ResMut<NextState<GameState>>,
 ) {
-    let current = game.get().clone(); // Store the current game so we only every transition once but still process all messages
+    let current = *game.get(); // Store the current game so we only every transition once but still process all messages
     for game in rx.read() {
         let next_game_kind = match current {
             Game::None => Game::Catch,
@@ -173,10 +173,10 @@ fn spawn_next(
             Game::Duck => Game::Example,
             Game::Catch => Game::CatBonk,
             Game::CatBonk => Game::Catch,
-            Game::PreGame => todo!(), // If this get hit something has gone wrong
+            Game::Pre => todo!(), // If this get hit something has gone wrong
         };
 
-        next_game.set(Game::PreGame);
+        next_game.set(Game::Pre);
         game_data.apply_result(game.result, Duration::from_secs(5)); // TODO: Actually time passed between games?
         next_game_state.set(GameState::PreGame(get_info(next_game_kind)));
 
@@ -190,7 +190,7 @@ fn spawn_next(
 const fn get_info(game: Game) -> GameInfo {
     match game {
         Game::None => todo!(),
-        Game::PreGame => todo!(), // If this get hit something has gone wrong
+        Game::Pre => todo!(), // If this get hit something has gone wrong
         Game::Example => example::get_info(),
         Game::Duck => duck::get_info(),
         Game::Catch => catch::get_info(),

@@ -38,7 +38,7 @@ pub(super) fn plugin(app: &mut App) {
 pub const fn get_info() -> GameInfo {
     GameInfo {
         kind: GAME,
-        controls: GameControlMethod::WASD,
+        controls: GameControlMethod::Wasd,
     }
 }
 
