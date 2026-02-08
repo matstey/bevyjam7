@@ -4,19 +4,24 @@ use bevy::prelude::*;
 
 use crate::{
     AppSystems, PausableSystems,
-    games::{Game, GameInfo, GameState},
+    games::{
+        Game, GameData, GameInfo, GameState,
+        pre_game::control_method::{ControlMethodAssets, control_method},
+    },
+    layout,
     screens::Screen,
     theme::widget,
 };
 
 mod balance;
+mod control_method;
 mod hint;
 
 const GAME: Game = Game::Pre;
 const COUNTDOWN: Duration = Duration::from_secs(5);
 
 pub(super) fn plugin(app: &mut App) {
-    app.add_plugins(hint::plugin);
+    app.add_plugins((hint::plugin, control_method::plugin));
     app.add_systems(OnEnter(GAME), spawn);
     app.add_systems(
         Update,
@@ -55,19 +60,37 @@ pub fn spawn(
     mut state: ResMut<PreGameState>,
     time: Res<Time>,
     game_state: Res<State<GameState>>,
+    assets: Res<ControlMethodAssets>,
+    data: Res<GameData>,
 ) {
     if let GameState::PreGame(info) = game_state.get() {
         state.reset(time.elapsed(), *info);
 
         commands.spawn((
-            widget::ui_root("Pre Game Level"),
+            widget::ui_root("pre_game_ui"),
             DespawnOnExit(GAME), // When exiting this game despawn this entity
             DespawnOnExit(Screen::Gameplay), // When exiting the top level game despawn this entity
-            children![
-                widget::header(format!("Pre Game ({})", info.kind)),
-                (widget::label("0"), PreGameCountdown),
-                widget::label(format!("{}", info.controls)),
-            ],
+            children![(
+                layout::grid_parent(),
+                children![
+                    (
+                        layout::top_center(),
+                        children![widget::header(format!("{}", info.kind)),]
+                    ),
+                    (
+                        layout::bottom_right(),
+                        children![(widget::label("0"), Node { ..default() }, PreGameCountdown)]
+                    ),
+                    (
+                        layout::bottom_left(),
+                        children![control_method(info.controls, &assets)]
+                    ),
+                    (
+                        layout::top_left(),
+                        children![widget::label(format!("{}", data.round + 1))]
+                    )
+                ],
+            )],
         ));
     }
 }

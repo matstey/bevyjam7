@@ -8,12 +8,16 @@ mod audio;
 #[cfg(feature = "dev")]
 mod dev_tools;
 mod games;
+mod layout;
 mod menus;
 mod movement;
 mod screens;
 mod theme;
 
-use bevy::{asset::AssetMetaCheck, prelude::*};
+use bevy::{
+    asset::{AssetMetaCheck, load_internal_binary_asset},
+    prelude::*,
+};
 
 fn main() -> AppExit {
     App::new().add_plugins(AppPlugin).run()
@@ -42,6 +46,14 @@ impl Plugin for AppPlugin {
                     .into(),
                     ..default()
                 }),
+        );
+
+        // Load this font as the default
+        load_internal_binary_asset!(
+            app,
+            TextFont::default().font,
+            "../assets/fonts/RockSalt-Regular.ttf",
+            |bytes: &[u8], _path: String| { Font::try_from_bytes(bytes.to_vec()).unwrap() }
         );
 
         // Add other plugins.
