@@ -3,10 +3,10 @@ use std::{fmt::Display, time::Duration};
 use bevy::prelude::*;
 
 mod balance;
+mod cat_bonk;
 mod catch;
 mod duck;
 mod example;
-mod cat_bonk;
 mod pre_game;
 
 #[derive(Debug, Default, Copy, Clone, Eq, PartialEq, Hash, States)]

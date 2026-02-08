@@ -1,8 +1,8 @@
-use bevy::prelude::*;
 use crate::{
-    games::cat_bonk::{GAME, CatBonkAssets},
+    games::cat_bonk::{CatBonkAssets, GAME},
     screens::Screen,
 };
+use bevy::prelude::*;
 
 #[derive(Debug, Default, Component)]
 pub struct Background;
@@ -14,9 +14,7 @@ pub fn level(assets: &CatBonkAssets) -> impl Bundle {
         Visibility::default(),
         DespawnOnExit(GAME),
         DespawnOnExit(Screen::Gameplay),
-        Sprite::from_image(
-            assets.background.clone(),
-        ),
+        Sprite::from_image(assets.background.clone()),
         Background,
     )
 }
