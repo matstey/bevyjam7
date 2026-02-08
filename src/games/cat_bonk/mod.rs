@@ -1,4 +1,3 @@
-use rand::prelude::*;
 use rand::seq::index;
 use std::time::Duration;
 
@@ -77,7 +76,7 @@ impl CatBonkState {
     /// Assuming that is what we want.
     pub fn reset(&mut self, start_time: Duration) {
         self.start_time = start_time;
-        self.run_time = Duration::from_secs(GAME_DURATION);
+        self.run_time = balance::GAME_DURATION;
 
         // todo: scale from difficulty
         self.target_count = 3;

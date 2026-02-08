@@ -1,4 +1,4 @@
-use bevy::{prelude::*, sprite};
+use bevy::prelude::*;
 
 use crate::{
     games::cat_bonk::{CatBonkAssets, GAME},
