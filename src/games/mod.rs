@@ -6,6 +6,7 @@ mod balance;
 mod catch;
 mod duck;
 mod example;
+mod cat_bonk;
 mod pre_game;
 
 #[derive(Debug, Default, Copy, Clone, Eq, PartialEq, Hash, States)]
@@ -16,6 +17,7 @@ pub enum Game {
     Example,
     Duck,
     Catch,
+    CatBonk,
 }
 
 impl Display for Game {
@@ -29,6 +31,7 @@ impl Display for Game {
                 Game::Example => "Example",
                 Game::Duck => "Duck",
                 Game::Catch => "Catch",
+                Game::CatBonk => "CatBonk",
             }
         )
     }
@@ -140,6 +143,7 @@ pub(super) fn plugin(app: &mut App) {
         example::plugin,
         duck::plugin,
         catch::plugin,
+        cat_bonk::plugin,
     ));
 }
 
@@ -149,7 +153,7 @@ pub fn spawn_first(
     mut next_game_state: ResMut<NextState<GameState>>,
 ) {
     next_game.set(Game::PreGame);
-    next_game_state.set(GameState::PreGame(get_info(Game::Catch)));
+    next_game_state.set(GameState::PreGame(get_info(Game::CatBonk)));
 }
 
 /// A system that triggers the next game to spawn when a `NextGame` message is sent
@@ -167,7 +171,8 @@ fn spawn_next(
             Game::None => Game::Catch,
             Game::Example => Game::Catch,
             Game::Duck => Game::Example,
-            Game::Catch => Game::Duck,
+            Game::Catch => Game::CatBonk,
+            Game::CatBonk => Game::Catch,
             Game::PreGame => todo!(), // If this get hit something has gone wrong
         };
 
@@ -189,5 +194,6 @@ const fn get_info(game: Game) -> GameInfo {
         Game::Example => example::get_info(),
         Game::Duck => duck::get_info(),
         Game::Catch => catch::get_info(),
+        Game::CatBonk => cat_bonk::get_info(),
     }
 }
