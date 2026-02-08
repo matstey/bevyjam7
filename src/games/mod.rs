@@ -141,6 +141,7 @@ pub(super) fn plugin(app: &mut App) {
 
     // Register all mini games here
     app.add_plugins((
+        camera::plugin,
         pre_game::plugin,
         example::plugin,
         duck::plugin,

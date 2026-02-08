@@ -2,15 +2,15 @@ use rand::seq::index;
 use std::time::Duration;
 
 use bevy::{
-    app::Propagate,
-    camera::ScalingMode,
-    image::{ImageLoaderSettings, ImageSampler},
-    prelude::*,
+    app::Propagate, camera::ScalingMode, image::{ImageLoaderSettings, ImageSampler}, input::common_conditions::input_just_pressed, prelude::*
 };
 
 use crate::{
     asset_tracking::LoadResource,
-    games::{Game, GameControlMethod, GameInfo, GameResult, NextGame, camera},
+    games::{
+        Game, GameControlMethod, GameInfo, GameResult, NextGame,
+        camera::{self, shake::CameraShakeConfig},
+    },
     screens::Screen,
     theme::widget,
 };
@@ -81,7 +81,7 @@ impl CatBonkState {
         self.run_time = balance::GAME_DURATION;
 
         // todo: scale from difficulty
-        self.target_count = 3;
+        self.target_count = 6;
         self.hit_count = 0;
     }
 }
@@ -125,6 +125,7 @@ pub fn spawn(
         DespawnOnExit(GAME),             // When exiting this game despawn this entity
         DespawnOnExit(Screen::Gameplay), // When exiting the top level game despawn this entity
         Camera2d,
+        CameraShakeConfig::default(),
         Camera {
             order: -1,
             clear_color: ClearColorConfig::None,
@@ -189,6 +190,7 @@ pub(super) fn plugin(app: &mut App) {
             weapon::update,
             cat::update,
             update_countdown,
+            weapon::update_weapon_hit.run_if(input_just_pressed(MouseButton::Left)),
         )
             .run_if(in_state(GAME)),
     );
