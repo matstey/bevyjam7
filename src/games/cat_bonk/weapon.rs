@@ -1,8 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{
-    games::cat_bonk::CatBonkAssets,
-};
+use crate::games::cat_bonk::CatBonkAssets;
 
 #[derive(Debug, Default, Component)]
 pub struct Weapon;

@@ -3,9 +3,9 @@ use std::time::Duration;
 
 use bevy::{
     app::Propagate,
+    camera::ScalingMode,
     image::{ImageLoaderSettings, ImageSampler},
     prelude::*,
-    camera::ScalingMode,
 };
 
 use crate::{
@@ -55,7 +55,7 @@ impl FromWorld for CatBonkAssets {
                 },
             ),
             cat: assets.load_with_settings(
-                "games/cat/cat1.png",
+                "games/cat/cat1-sheet.png",
                 |settings: &mut ImageLoaderSettings| {
                     settings.sampler = ImageSampler::nearest();
                 },
@@ -91,6 +91,7 @@ pub fn spawn(
     assets: Res<CatBonkAssets>,
     mut state: ResMut<CatBonkState>,
     time: Res<Time>,
+    mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
 ) {
     state.reset(time.elapsed());
 
@@ -131,7 +132,7 @@ pub fn spawn(
         },
         Projection::from(OrthographicProjection {
             scaling_mode: ScalingMode::FixedVertical {
-                viewport_height: 450.0
+                viewport_height: 450.0,
             },
             ..OrthographicProjection::default_2d()
         }),
@@ -151,7 +152,12 @@ pub fn spawn(
             // spawn cats at random locations
             for spawn_index in indices {
                 parent
-                    .spawn(cat::cat(&assets, &state, cat_spawns[spawn_index]))
+                    .spawn(cat::cat(
+                        &assets,
+                        &state,
+                        cat_spawns[spawn_index],
+                        &mut texture_atlas_layouts,
+                    ))
                     .observe(cat::on_hit);
             }
         })
