@@ -3,6 +3,7 @@ use rand::Rng;
 use std::time::Duration;
 
 use crate::audio::sound_effect;
+use crate::float::Floats;
 use crate::games::{popup::PopupAssets, popup::PopupState, popup::balance};
 
 #[derive(Debug, Default, Component)]
@@ -45,6 +46,7 @@ pub fn popup_window(assets: &PopupAssets, state: &PopupState, index: u32) -> imp
             close: close_loc,
             popup_delay: Duration::from_secs_f64(delay),
         },
+        Floats,
     )
 }
 

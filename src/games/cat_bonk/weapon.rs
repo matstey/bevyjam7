@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 
 use crate::audio::sound_effect;
+use crate::float::Floats;
 use crate::games::{camera::shake::CameraShakeState, cat_bonk::CatBonkAssets};
 
 #[derive(Debug, Default, Component)]
@@ -11,12 +12,15 @@ pub fn weapon(assets: &CatBonkAssets) -> impl Bundle {
         Name::new("weapon"),
         Transform::from_xyz(0.0, 0.0, 2.0),
         Visibility::default(),
-        Sprite {
-            image: assets.weapon.clone(),
-            custom_size: Some(Vec2::new(160.0, 174.0)),
-            ..default()
-        },
         Weapon,
+        children![(
+            Sprite {
+                image: assets.weapon.clone(),
+                custom_size: Some(Vec2::new(160.0, 174.0)),
+                ..default()
+            },
+            Floats
+        )],
     )
 }
 

@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use bevy::{prelude::*, window::PrimaryWindow};
+use bevy::prelude::*;
 use rand::Rng;
 
 use crate::{float::Floats, games::GameData, random};
@@ -11,22 +11,20 @@ pub(super) fn plugin(app: &mut App) {
 
 fn spawn(
     mut commands: Commands,
-    query: Query<(Entity, &UiTransform), Added<Floats>>,
-    window: Single<&Window, With<PrimaryWindow>>,
+    query: Query<(Entity, &Transform), (Added<Floats>, With<Sprite>)>,
 ) {
     for (entity, transform) in query.iter() {
         commands
             .entity(entity)
-            .insert((FloatsPositionUiData::new(transform.translation.resolve(
-                window.scale_factor(),
-                window.size(),
-                window.size(),
-            )),));
+            .insert(FloatsPositionSpriteData::new(
+                Vec2::new(transform.translation.x, transform.translation.y),
+                transform.translation.z,
+            ));
     }
 }
 
 fn update(
-    mut query: Query<(&mut UiTransform, &mut FloatsPositionUiData), With<Floats>>,
+    mut query: Query<(&mut Transform, &mut FloatsPositionSpriteData), With<Floats>>,
     data: Res<GameData>,
     time: Res<Time>,
 ) {
@@ -34,39 +32,42 @@ fn update(
     for (mut transform, mut floats_data) in query.iter_mut() {
         if floats_data.expired(time.elapsed()) {
             // Generate new target position
-            floats_data.move_start = floats_data.target; // Assume we met target. Saves using `resolve()`
+            floats_data.move_start = floats_data.target;
+            // Use the sign of the last target to make sure we always rotate the other way
             floats_data.target = Vec2::new(
-                rng.random_range(2.0..10.0) * random::sign(&mut rng),
-                rng.random_range(2.0..10.0) * random::sign(&mut rng),
+                rng.random_range(1.0..5.0) * random::sign(&mut rng),
+                rng.random_range(1.0..5.0) * random::sign(&mut rng),
             );
             floats_data.move_start_time = time.elapsed();
-            let speed = rng.random_range(5.0..10.0) * data.fever_grade(); // px/s
+            let speed = rng.random_range(1.0..5.0) * data.fever_grade();
             floats_data.move_duration =
                 Duration::from_secs_f32(floats_data.move_distance() / speed);
         } else {
-            let pos = floats_data.start + floats_data.lerp(time.elapsed());
-            transform.translation = Val2::px(pos.x, pos.y);
+            transform.translation =
+                (floats_data.start + floats_data.lerp(time.elapsed())).extend(floats_data.order);
         }
     }
 }
 
 #[derive(Debug, Clone, Component)]
-struct FloatsPositionUiData {
+struct FloatsPositionSpriteData {
     start: Vec2,
     target: Vec2,
     move_start: Vec2,
     move_start_time: Duration,
     move_duration: Duration,
+    order: f32,
 }
 
-impl FloatsPositionUiData {
-    pub fn new(start: Vec2) -> Self {
+impl FloatsPositionSpriteData {
+    pub fn new(start: Vec2, order: f32) -> Self {
         Self {
             start,
             target: Vec2::ZERO,
             move_start: Vec2::ZERO,
             move_start_time: Duration::default(),
             move_duration: Duration::default(),
+            order,
         }
     }
 

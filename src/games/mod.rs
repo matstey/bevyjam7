@@ -112,6 +112,10 @@ impl GameData {
     fn adjust_health(&mut self, adjustment: f32) {
         self.health = (self.health + adjustment).clamp(0.0, balance::MAX_HEALTH);
     }
+
+    pub fn fever_grade(&self) -> f32 {
+        self.round as f32 // TODO: Added health
+    }
 }
 
 #[derive(Debug, Copy, Clone, Message)]

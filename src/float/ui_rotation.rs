@@ -26,13 +26,13 @@ fn update(
     for (mut transform, mut floats_data) in query.iter_mut() {
         if floats_data.expired(time.elapsed()) {
             // Generate new target position
+            floats_data.move_start = floats_data.target;
             // Use the sign of the last target to make sure we always rotate the other way
             floats_data.target = Rot2::degrees(
-                rng.random_range(1.0..3.0) * -floats_data.target.as_degrees().signum(),
+                rng.random_range(0.0..2.0) * -floats_data.target.as_degrees().signum(),
             );
-            floats_data.move_start = transform.rotation;
             floats_data.move_start_time = time.elapsed();
-            let speed = rng.random_range(2.0..3.0) * data.round.max(1) as f32; // deg/s
+            let speed = rng.random_range(2.0..3.0) * data.fever_grade(); // deg/s
             floats_data.move_duration =
                 Duration::from_secs_f32(floats_data.move_distance() / speed);
         } else {
@@ -54,8 +54,8 @@ impl FloatsRotationUiData {
     pub fn new(start: Rot2) -> Self {
         Self {
             start,
-            target: start,
-            move_start: start,
+            target: Rot2::default(),
+            move_start: Rot2::default(),
             move_start_time: Duration::default(),
             move_duration: Duration::default(),
         }
