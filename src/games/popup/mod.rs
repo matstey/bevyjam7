@@ -206,7 +206,7 @@ pub fn spawn(
 
 /// Just a simple system that transitions us to the next game after some time
 pub fn update(state: Res<PopupState>, time: Res<Time>, mut tx: MessageWriter<NextGame>) {
-    if state.remaining <= 0 {
+    if state.remaining == 0 {
         tx.write(NextGame::from_result(GameResult::Passsed));
         info!("all targets closed - next game");
     }

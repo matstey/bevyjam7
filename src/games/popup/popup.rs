@@ -56,28 +56,21 @@ pub fn on_hit(
 ) {
     if let Ok(popup) = popup_query.get(click.entity)
         && let Some(world_pos) = click.hit.position
+        && let Ok(transform) = query.get(click.entity)
     {
-        if let Ok(transform) = query.get(click.entity) {
-            // Convert world position to local position
-            let local_pos = transform.affine().inverse().transform_point3(world_pos);
-            let local_2d = Vec2 {
-                x: local_pos.x,
-                y: local_pos.y,
-            };
+        // Convert world position to local position
+        let local_pos = transform.affine().inverse().transform_point3(world_pos);
+        let local_2d = Vec2 {
+            x: local_pos.x,
+            y: local_pos.y,
+        };
 
-            info!(
-                "Clicked at local position: {:.2}, {:.2}",
-                local_pos.x, local_pos.y
-            );
-            info!("Close at: {:.2}", popup.close.center());
+        if popup.close.contains(local_2d) {
+            commands.entity(click.entity).despawn();
+            //todo: play sound
+            //todo: hit effect?
 
-            if popup.close.contains(local_2d) {
-                commands.entity(click.entity).despawn();
-                //todo: play sound
-                //todo: hit effect?
-
-                state.remaining -= 1;
-            }
+            state.remaining -= 1;
         }
     }
 }
