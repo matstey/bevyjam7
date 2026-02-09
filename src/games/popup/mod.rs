@@ -18,7 +18,7 @@ use crate::{
 };
 
 mod balance;
-mod popup;
+mod popup_window;
 
 const GAME: Game = Game::Popup;
 
@@ -32,7 +32,7 @@ pub(super) fn plugin(app: &mut App) {
     // Register all systems that are to be run when this game is active
     app.add_systems(
         Update,
-        (update, popup::update)
+        (update, popup_window::update)
             .in_set(AppSystems::Update)
             .in_set(PausableSystems)
             .run_if(in_state(GAME)),
@@ -192,8 +192,8 @@ pub fn spawn(
         .with_children(|parent| {
             for i in 0..state.remaining {
                 parent
-                    .spawn(popup::popup(&assets, &state, i + 1))
-                    .observe(popup::on_hit);
+                    .spawn(popup_window::popup_window(&assets, &state, i + 1))
+                    .observe(popup_window::on_hit);
             }
         })
         .id();

@@ -6,12 +6,12 @@ use crate::audio::sound_effect;
 use crate::games::{popup::PopupAssets, popup::PopupState, popup::balance};
 
 #[derive(Debug, Default, Component)]
-pub struct Popup {
+pub struct PopupWindow {
     close: Rect,
     popup_delay: Duration,
 }
 
-pub fn popup(assets: &PopupAssets, state: &PopupState, index: u32) -> impl Bundle {
+pub fn popup_window(assets: &PopupAssets, state: &PopupState, index: u32) -> impl Bundle {
     let mut rng = rand::rng();
     let idx = rng.random_range(0..assets.popups.len());
     let asset = assets.popups[idx].clone();
@@ -41,7 +41,7 @@ pub fn popup(assets: &PopupAssets, state: &PopupState, index: u32) -> impl Bundl
         Visibility::Hidden,
         Sprite::from_image(asset),
         Pickable::default(),
-        Popup {
+        PopupWindow {
             close: close_loc,
             popup_delay: Duration::from_secs_f64(delay),
         },
@@ -54,7 +54,7 @@ pub fn on_hit(
     assets: Res<PopupAssets>,
     mut state: ResMut<PopupState>,
     query: Query<&GlobalTransform>,
-    popup_query: Query<&Popup>,
+    popup_query: Query<&PopupWindow>,
 ) {
     if let Ok(popup) = popup_query.get(click.entity)
         && let Some(world_pos) = click.hit.position
@@ -81,7 +81,7 @@ pub fn update(
     time: Res<Time>,
     assets: Res<PopupAssets>,
     state: Res<PopupState>,
-    popups: Query<(&Popup, &mut Visibility)>,
+    popups: Query<(&PopupWindow, &mut Visibility)>,
 ) {
     let elapsed = time.elapsed() - state.start_time;
 
