@@ -1,5 +1,5 @@
 use bevy::{prelude::*, window::PrimaryWindow};
-use rand::Rng;
+use rand::{Rng, rngs::ThreadRng};
 
 pub(super) fn plugin(app: &mut App) {
     app.init_resource::<Random2dPosition>();
@@ -23,4 +23,8 @@ impl Random2dPosition {
 
 fn update_area(mut random: ResMut<Random2dPosition>, window: Single<&Window, With<PrimaryWindow>>) {
     random.area = window.size() * 0.5; // Just sort half size as 0,0 is screen center
+}
+
+pub fn sign(rng: &mut ThreadRng) -> f32 {
+    if rng.random_bool(0.5) { 1.0 } else { -1.0 }
 }

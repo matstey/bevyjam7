@@ -1,4 +1,4 @@
-use crate::{asset_tracking::LoadResource, games::GameControlMethod, theme};
+use crate::{asset_tracking::LoadResource, float::Floats, games::GameControlMethod, theme};
 use bevy::prelude::*;
 
 pub(super) fn plugin(app: &mut App) {
@@ -42,6 +42,7 @@ pub fn control_method(method: GameControlMethod, assets: &ControlMethodAssets) -
             offset: px(6),
             color: theme::palette::HEADER_TEXT,
         },
+        Floats,
     )
 }
 

@@ -82,11 +82,21 @@ impl Display for GameControlMethod {
 }
 
 /// Global game state updated after each game completes
-#[derive(Debug, Default, Copy, Clone, Resource)]
+#[derive(Debug, Copy, Clone, Resource)]
 pub struct GameData {
     pub health: f32,
     pub round: u32,
     pub elapsed: Duration,
+}
+
+impl Default for GameData {
+    fn default() -> Self {
+        Self {
+            health: Default::default(),
+            round: 1,
+            elapsed: Default::default(),
+        }
+    }
 }
 
 impl GameData {
@@ -175,12 +185,12 @@ fn spawn_next(
     let current = *game.get(); // Store the current game so we only every transition once but still process all messages
     for game in rx.read() {
         let next_game_kind = match current {
-            Game::None => Game::Catch,
-            Game::Example => Game::Catch,
+            Game::None => Game::CatBonk,
+            Game::Example => Game::CatBonk,
             Game::Duck => Game::Example,
             Game::Catch => Game::CatBonk,
             Game::CatBonk => Game::Popup,
-            Game::Popup => Game::Catch,
+            Game::Popup => Game::CatBonk,
             Game::Pre => todo!(), // If this get hit something has gone wrong
         };
 

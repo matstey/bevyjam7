@@ -7,6 +7,8 @@ mod asset_tracking;
 mod audio;
 #[cfg(feature = "dev")]
 mod dev_tools;
+mod easing;
+mod float;
 mod games;
 mod layout;
 mod lifetime;
@@ -74,6 +76,7 @@ impl Plugin for AppPlugin {
             movement::plugin,
             random::plugin,
             lifetime::plugin,
+            float::plugin,
         ));
 
         // Order new `AppSystems` variants by adding them here:

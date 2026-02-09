@@ -7,7 +7,10 @@ use bevy::{
     prelude::*,
 };
 
-use crate::theme::{interaction::InteractionPalette, palette::*};
+use crate::{
+    float::Floats,
+    theme::{interaction::InteractionPalette, palette::*},
+};
 
 /// A root UI node that fills the window and centers its content.
 pub fn ui_root(name: impl Into<Cow<'static, str>>) -> impl Bundle {
@@ -34,6 +37,7 @@ pub fn header(text: impl Into<String>) -> impl Bundle {
         Text(text.into()),
         TextFont::from_font_size(100.0),
         TextColor(HEADER_TEXT),
+        Floats,
     )
 }
 
@@ -44,6 +48,7 @@ pub fn label(text: impl Into<String>) -> impl Bundle {
         Text(text.into()),
         TextFont::from_font_size(24.0),
         TextColor(LABEL_TEXT),
+        Floats,
     )
 }
 
@@ -104,6 +109,7 @@ where
     (
         Name::new("Button"),
         Node::default(),
+        Floats,
         Children::spawn(SpawnWith(|parent: &mut ChildSpawner| {
             parent
                 .spawn((

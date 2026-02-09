@@ -100,15 +100,15 @@ pub fn spawn(
                     ),
                     (
                         layout::bottom_right(),
-                        children![(widget::label("0"), Node { ..default() }, PreGameCountdown)]
+                        children![(widget::label("0"), Node { ..default() }, PreGameCountdown)],
                     ),
                     (
                         layout::bottom_left(),
-                        children![control_method(info.controls, &control_assets)]
+                        children![control_method(info.controls, &control_assets)],
                     ),
                     (
                         layout::top_left(),
-                        children![widget::label(format!("{}", data.round + 1))]
+                        children![widget::label(format!("{}", data.round))],
                     )
                 ],
             )],
