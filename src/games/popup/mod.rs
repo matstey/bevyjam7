@@ -76,6 +76,10 @@ pub struct PopupAssets {
     pub popups: Vec<Handle<Image>>,
     #[dependency]
     pub background: Handle<Image>,
+    #[dependency]
+    pub notify_sound: Handle<AudioSource>,
+    #[dependency]
+    pub close_sound: Handle<AudioSource>,
 }
 
 impl FromWorld for PopupAssets {
@@ -145,6 +149,8 @@ impl FromWorld for PopupAssets {
                     settings.sampler = ImageSampler::nearest();
                 },
             ),
+            notify_sound: assets.load("games/popup/notify.ogg"),
+            close_sound: assets.load("games/popup/close.ogg"),
         }
     }
 }

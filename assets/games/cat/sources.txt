@@ -1,1 +1,3 @@
 hit.ogg - https://pixabay.com/sound-effects/film-special-effects-hard-slap-46388/
+notify.ogg - https://pixabay.com/sound-effects/film-special-effects-new-notification-018-363746/
+close.ogg - https://pixabay.com/sound-effects/film-special-effects-ui-sounds-pack-3-16-359726/

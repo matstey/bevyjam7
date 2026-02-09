@@ -2,6 +2,7 @@ use bevy::prelude::*;
 use rand::Rng;
 use std::time::Duration;
 
+use crate::audio::sound_effect;
 use crate::games::{popup::PopupAssets, popup::PopupState, popup::balance};
 
 #[derive(Debug, Default, Component)]
@@ -50,6 +51,7 @@ pub fn popup(assets: &PopupAssets, state: &PopupState, index: u32) -> impl Bundl
 pub fn on_hit(
     click: On<Pointer<Click>>,
     mut commands: Commands,
+    assets: Res<PopupAssets>,
     mut state: ResMut<PopupState>,
     query: Query<&GlobalTransform>,
     popup_query: Query<&Popup>,
@@ -67,23 +69,26 @@ pub fn on_hit(
 
         if popup.close.contains(local_2d) {
             commands.entity(click.entity).despawn();
-            //todo: play sound
-            //todo: hit effect?
-
+            commands.spawn(sound_effect(assets.close_sound.clone()));
             state.remaining -= 1;
         }
     }
 }
 
 // todo: pop up after random time period
-pub fn update(time: Res<Time>, state: Res<PopupState>, popups: Query<(&Popup, &mut Visibility)>) {
+pub fn update(
+    mut commands: Commands,
+    time: Res<Time>,
+    assets: Res<PopupAssets>,
+    state: Res<PopupState>,
+    popups: Query<(&Popup, &mut Visibility)>,
+) {
     let elapsed = time.elapsed() - state.start_time;
 
     for (popup, mut visibility) in popups {
         if *visibility == Visibility::Hidden && elapsed > popup.popup_delay {
             visibility.toggle_visible_hidden();
+            commands.spawn(sound_effect(assets.notify_sound.clone()));
         }
-
-        //todo: play sound
     }
 }
