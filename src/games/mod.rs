@@ -8,6 +8,7 @@ mod cat_bonk;
 mod catch;
 mod duck;
 mod example;
+mod popup;
 mod pre_game;
 
 #[derive(Debug, Default, Copy, Clone, Eq, PartialEq, Hash, States)]
@@ -19,6 +20,7 @@ pub enum Game {
     Duck,
     Catch,
     CatBonk,
+    Popup,
 }
 
 impl Display for Game {
@@ -33,6 +35,7 @@ impl Display for Game {
                 Game::Duck => "Duck",
                 Game::Catch => "Catch",
                 Game::CatBonk => "CatBonk",
+                Game::Popup => "Popup",
             }
         )
     }
@@ -147,6 +150,7 @@ pub(super) fn plugin(app: &mut App) {
         duck::plugin,
         catch::plugin,
         cat_bonk::plugin,
+        popup::plugin,
     ));
 }
 
@@ -175,7 +179,8 @@ fn spawn_next(
             Game::Example => Game::Catch,
             Game::Duck => Game::Example,
             Game::Catch => Game::CatBonk,
-            Game::CatBonk => Game::Catch,
+            Game::CatBonk => Game::Popup,
+            Game::Popup => Game::Catch,
             Game::Pre => todo!(), // If this get hit something has gone wrong
         };
 
@@ -198,5 +203,6 @@ const fn get_info(game: Game) -> GameInfo {
         Game::Duck => duck::get_info(),
         Game::Catch => catch::get_info(),
         Game::CatBonk => cat_bonk::get_info(),
+        Game::Popup => popup::get_info(),
     }
 }

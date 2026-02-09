@@ -37,8 +37,11 @@ struct CatBonkCountdown;
 pub struct CatBonkAssets {
     #[dependency]
     background: Handle<Image>,
+    #[dependency]
     weapon: Handle<Image>,
+    #[dependency]
     cat: Handle<Image>,
+    #[dependency]
     hit_sound: Handle<AudioSource>,
 }
 
