@@ -17,6 +17,7 @@ mod movement;
 mod random;
 mod screens;
 mod theme;
+mod timeout;
 
 use bevy::{
     app::HierarchyPropagatePlugin,
@@ -77,6 +78,7 @@ impl Plugin for AppPlugin {
             random::plugin,
             lifetime::plugin,
             float::plugin,
+            timeout::plugin,
         ));
 
         // Order new `AppSystems` variants by adding them here:

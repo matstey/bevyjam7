@@ -11,13 +11,12 @@ pub struct Cat {
 
 pub fn cat(
     assets: &CatBonkAssets,
-    state: &CatBonkState,
     pos: Vec2,
     texture_atlas_layouts: &mut Assets<TextureAtlasLayout>,
 ) -> impl Bundle {
     // use bevy random source?
     let mut rng = rand::rng();
-    let max = state.run_time.as_secs_f64() * balance::MAX_SPAWN_MULTIPLIER;
+    let max = balance::GAME_DURATION.as_secs_f64() * balance::MAX_SPAWN_MULTIPLIER;
     let delay = rng.random_range(0.0..max);
 
     let layout = TextureAtlasLayout::from_grid(UVec2 { x: 128, y: 60 }, 2, 1, None, None);

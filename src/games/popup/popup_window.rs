@@ -12,7 +12,7 @@ pub struct PopupWindow {
     popup_delay: Duration,
 }
 
-pub fn popup_window(assets: &PopupAssets, state: &PopupState, index: u32) -> impl Bundle {
+pub fn popup_window(assets: &PopupAssets, index: u32) -> impl Bundle {
     let mut rng = rand::rng();
     let idx = rng.random_range(0..assets.popups.len());
     let asset = assets.popups[idx].clone();
@@ -31,7 +31,7 @@ pub fn popup_window(assets: &PopupAssets, state: &PopupState, index: u32) -> imp
     let y = rng.random_range(-max.y..max.y);
     let close_loc = Rect::from_center_size((size / 2.0) - 8.0, Vec2::splat(17.0));
 
-    let max = state.run_time.as_secs_f64() * balance::MAX_SPAWN_DELAY_MULTIPLIER;
+    let max = balance::GAME_DURATION.as_secs_f64() * balance::MAX_SPAWN_DELAY_MULTIPLIER;
     let delay = rng.random_range(0.0..max);
 
     println!("{} {}", size, close_loc.center());

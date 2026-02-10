@@ -13,6 +13,7 @@ use crate::{
         },
     },
     screens::Screen,
+    timeout::Timeout,
 };
 
 mod balance;
@@ -112,6 +113,7 @@ pub fn spawn(
             Visibility::default(),
             DespawnOnExit(GAME), // When exiting this game despawn this entity
             DespawnOnExit(Screen::Gameplay), // When exiting the top level game despawn this entity
+            Timeout::default(),
             children![glove(
                 balance::GLOVE_SPEED,
                 &assets,

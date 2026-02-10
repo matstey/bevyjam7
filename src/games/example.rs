@@ -8,6 +8,7 @@ use crate::{
     games::{Game, GameControlMethod, GameInfo, GameResult, NextGame},
     screens::Screen,
     theme::widget,
+    timeout::Timeout,
 };
 
 const GAME: Game = Game::Example;
@@ -92,6 +93,7 @@ pub fn spawn(
         widget::ui_root("Example Level"),
         DespawnOnExit(GAME), // When exiting this game despawn this entity
         DespawnOnExit(Screen::Gameplay), // When exiting the top level game despawn this entity
+        Timeout::default(),
         children![
             widget::header("Example Game"),
             (widget::label("0"), ExampleCountdown)

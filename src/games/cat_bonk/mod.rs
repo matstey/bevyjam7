@@ -1,5 +1,6 @@
-use rand::seq::index;
 use std::time::Duration;
+
+use rand::seq::index;
 
 use bevy::{
     app::Propagate,
@@ -17,6 +18,7 @@ use crate::{
     },
     screens::Screen,
     theme::widget,
+    timeout::{TimedOut, Timeout, TimeoutLabel},
 };
 
 mod balance;
@@ -25,11 +27,6 @@ pub mod level;
 pub mod weapon;
 
 const GAME: Game = Game::CatBonk;
-
-/// Anything with this component will have its `Text` set to the countdown time
-#[derive(Debug, Default, Component)]
-#[require(Text)]
-struct CatBonkCountdown;
 
 /// Used to track all assets for this game
 #[derive(Resource, Asset, Clone, Reflect)]
@@ -77,7 +74,6 @@ impl FromWorld for CatBonkAssets {
 #[derive(Debug, Default, Clone, Copy, Resource)]
 pub struct CatBonkState {
     pub start_time: Duration,
-    pub run_time: Duration,
     pub target_count: u32,
     pub hit_count: u32,
 }
@@ -87,8 +83,6 @@ impl CatBonkState {
     /// Assuming that is what we want.
     pub fn reset(&mut self, start_time: Duration) {
         self.start_time = start_time;
-        self.run_time = balance::GAME_DURATION;
-
         // todo: scale from difficulty
         self.target_count = 6;
         self.hit_count = 0;
@@ -99,8 +93,8 @@ pub fn spawn(
     mut commands: Commands,
     assets: Res<CatBonkAssets>,
     mut state: ResMut<CatBonkState>,
-    time: Res<Time>,
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
+    time: Res<Time>,
 ) {
     state.reset(time.elapsed());
 
@@ -149,12 +143,15 @@ pub fn spawn(
         camera::RENDERLAYER_GAME,
     ));
 
-    commands.spawn((
-        widget::ui_root("CatBonk UI"),
-        DespawnOnExit(GAME), // When exiting this game despawn this entity
-        DespawnOnExit(Screen::Gameplay), // When exiting the top level game despawn this entity
-        children![(widget::label("0"), CatBonkCountdown)],
-    ));
+    commands
+        .spawn((
+            widget::ui_root("CatBonk UI"),
+            DespawnOnExit(GAME), // When exiting this game despawn this entity
+            DespawnOnExit(Screen::Gameplay), // When exiting the top level game despawn this entity
+            Timeout::new(balance::GAME_DURATION),
+            children![TimeoutLabel],
+        ))
+        .observe(timed_out);
 
     let level = commands
         .spawn(level::level(&assets))
@@ -164,7 +161,6 @@ pub fn spawn(
                 parent
                     .spawn(cat::cat(
                         &assets,
-                        &state,
                         cat_spawns[spawn_index],
                         &mut texture_atlas_layouts,
                     ))
@@ -198,7 +194,6 @@ pub(super) fn plugin(app: &mut App) {
             level::update,
             weapon::update,
             cat::update,
-            update_countdown,
             weapon::update_weapon_hit.run_if(input_just_pressed(MouseButton::Left)),
         )
             .run_if(in_state(GAME)),
@@ -214,32 +209,15 @@ pub const fn get_info() -> GameInfo {
     }
 }
 
+fn timed_out(_event: On<TimedOut>, mut tx: MessageWriter<NextGame>) {
+    tx.write(NextGame::from_result(GameResult::Failed));
+    info!("timeout - next game");
+}
+
 /// Just a simple system that transitions us to the next game after some time
-pub fn update(state: Res<CatBonkState>, time: Res<Time>, mut tx: MessageWriter<NextGame>) {
+pub fn update(state: Res<CatBonkState>, mut tx: MessageWriter<NextGame>) {
     if state.hit_count >= state.target_count {
         tx.write(NextGame::from_result(GameResult::Passsed));
         info!("all targets hit - next game");
-    }
-
-    if time.elapsed() - state.start_time > state.run_time {
-        tx.write(NextGame::from_result(GameResult::Failed));
-        info!("timeout - next game");
-    }
-}
-
-/// Update anything with the `ExampleCountdown` component to display the current countdown
-fn update_countdown(
-    mut query: Query<&mut Text, With<CatBonkCountdown>>,
-    state: Res<CatBonkState>,
-    time: Res<Time>,
-) {
-    for mut text in query.iter_mut() {
-        let elapsed = time.elapsed() - state.start_time;
-        let countdown = if elapsed < state.run_time {
-            (state.run_time - elapsed).as_secs_f32().ceil() as u32
-        } else {
-            0
-        };
-        text.0 = format!("{}", countdown)
     }
 }

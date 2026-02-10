@@ -15,6 +15,8 @@ use crate::{
         camera::{self, shake::CameraShakeConfig},
     },
     screens::Screen,
+    theme::widget,
+    timeout::{TimedOut, Timeout, TimeoutLabel},
 };
 
 mod balance;
@@ -54,7 +56,6 @@ pub const fn get_info() -> GameInfo {
 #[derive(Debug, Default, Clone, Copy, Resource)]
 pub struct PopupState {
     pub start_time: Duration,
-    pub run_time: Duration,
     pub remaining: u32,
 }
 
@@ -63,7 +64,6 @@ impl PopupState {
     /// Assuming that is what we want.
     pub fn reset(&mut self, start_time: Duration) {
         self.start_time = start_time;
-        self.run_time = balance::GAME_DURATION;
         self.remaining = 5;
     }
 }
@@ -166,6 +166,7 @@ pub fn spawn(
     commands.spawn((
         DespawnOnExit(GAME),             // When exiting this game despawn this entity
         DespawnOnExit(Screen::Gameplay), // When exiting the top level game despawn this entity
+        Timeout::default(),
         Camera2d,
         CameraShakeConfig::default(),
         Camera {
@@ -192,7 +193,7 @@ pub fn spawn(
         .with_children(|parent| {
             for i in 0..state.remaining {
                 parent
-                    .spawn(popup_window::popup_window(&assets, &state, i + 1))
+                    .spawn(popup_window::popup_window(&assets, i + 1))
                     .observe(popup_window::on_hit);
             }
         })
@@ -208,17 +209,27 @@ pub fn spawn(
             Propagate(camera::RENDERLAYER_GAME),
         ))
         .add_children(&[level]);
+
+    commands
+        .spawn((
+            widget::ui_root("popup_ui"),
+            DespawnOnExit(GAME), // When exiting this game despawn this entity
+            DespawnOnExit(Screen::Gameplay), // When exiting the top level game despawn this entity
+            Timeout::new(balance::GAME_DURATION),
+            children![TimeoutLabel],
+        ))
+        .observe(timed_out);
+}
+
+fn timed_out(_event: On<TimedOut>, mut tx: MessageWriter<NextGame>) {
+    tx.write(NextGame::from_result(GameResult::Failed));
+    info!("timeout - next game");
 }
 
 /// Just a simple system that transitions us to the next game after some time
-pub fn update(state: Res<PopupState>, time: Res<Time>, mut tx: MessageWriter<NextGame>) {
+pub fn update(state: Res<PopupState>, mut tx: MessageWriter<NextGame>) {
     if state.remaining == 0 {
         tx.write(NextGame::from_result(GameResult::Passsed));
         info!("all targets closed - next game");
-    }
-
-    if time.elapsed() - state.start_time > state.run_time {
-        tx.write(NextGame::from_result(GameResult::Failed));
-        info!("timeout - next game");
     }
 }
