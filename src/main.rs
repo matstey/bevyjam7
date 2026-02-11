@@ -3,6 +3,7 @@
 // Disable console on Windows for non-dev builds.
 #![cfg_attr(not(feature = "dev"), windows_subsystem = "windows")]
 
+mod animation;
 mod asset_tracking;
 mod audio;
 #[cfg(feature = "dev")]
@@ -79,6 +80,7 @@ impl Plugin for AppPlugin {
             lifetime::plugin,
             float::plugin,
             timeout::plugin,
+            animation::plugin,
         ));
 
         // Order new `AppSystems` variants by adding them here:

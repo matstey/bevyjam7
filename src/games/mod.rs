@@ -8,6 +8,7 @@ mod cat_bonk;
 mod catch;
 mod duck;
 mod example;
+mod lobster;
 mod popup;
 mod pre_game;
 
@@ -21,6 +22,7 @@ pub enum Game {
     Catch,
     CatBonk,
     Popup,
+    Lobster,
 }
 
 impl Display for Game {
@@ -36,6 +38,7 @@ impl Display for Game {
                 Game::Catch => "Catch",
                 Game::CatBonk => "CatBonk",
                 Game::Popup => "Popup",
+                Game::Lobster => "Lobster",
             }
         )
     }
@@ -165,6 +168,7 @@ pub(super) fn plugin(app: &mut App) {
         catch::plugin,
         cat_bonk::plugin,
         popup::plugin,
+        lobster::plugin,
     ));
 }
 
@@ -194,7 +198,8 @@ fn spawn_next(
             Game::Duck => Game::Example,
             Game::Catch => Game::CatBonk,
             Game::CatBonk => Game::Popup,
-            Game::Popup => Game::CatBonk,
+            Game::Popup => Game::Lobster,
+            Game::Lobster => Game::CatBonk,
             Game::Pre => todo!(), // If this get hit something has gone wrong
         };
 
@@ -218,5 +223,6 @@ const fn get_info(game: Game) -> GameInfo {
         Game::Catch => catch::get_info(),
         Game::CatBonk => cat_bonk::get_info(),
         Game::Popup => popup::get_info(),
+        Game::Lobster => lobster::get_info(),
     }
 }
