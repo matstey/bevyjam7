@@ -90,6 +90,7 @@ fn spawn_label(mut commands: Commands, query: Query<Entity, (Added<TimeoutLabel>
     }
 }
 
+// TODO: Support hierarchy where `Timeout` and label are not direct child/parent
 fn update_label(
     mut label_query: Query<(&ChildOf, &mut Text), With<TimeoutLabel>>,
     timeout_query: Query<&TimeoutState>,
