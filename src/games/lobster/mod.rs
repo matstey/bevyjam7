@@ -5,9 +5,8 @@ use bevy::{
     app::Propagate,
     camera::ScalingMode,
     image::{ImageLoaderSettings, ImageSampler},
-    input::{common_conditions::input_just_pressed},
+    input::common_conditions::input_just_pressed,
     prelude::*,
-
 };
 
 use crate::float::Floats;
@@ -24,6 +23,7 @@ use crate::{
 };
 
 mod balance;
+mod lobster_char;
 mod oyster;
 
 const GAME: Game = Game::Lobster;
@@ -38,9 +38,12 @@ pub(super) fn plugin(app: &mut App) {
     // Register all systems that are to be run when this game is active
     app.add_systems(
         Update,
-        (oyster::update,
+        (
+            oyster::update,
             oyster::try_grab.run_if(input_just_pressed(KeyCode::Space)),
-            )
+            lobster_char::try_grab.run_if(input_just_pressed(KeyCode::Space)),
+            lobster_char::update_move,
+        )
             .in_set(AppSystems::Update)
             .in_set(PausableSystems)
             .run_if(in_state(GAME)),
@@ -85,6 +88,12 @@ pub struct LobsterAssets {
     #[dependency]
     pub pearl: Handle<Image>,
     #[dependency]
+    pub pearl_hit_sfx: Handle<AudioSource>,
+    #[dependency]
+    pub pearl_miss_sfx: Handle<AudioSource>,
+    #[dependency]
+    pub lobster_go: Handle<AudioSource>,
+    #[dependency]
     pub background: Handle<Image>,
 }
 
@@ -117,6 +126,9 @@ impl FromWorld for LobsterAssets {
                     settings.sampler = ImageSampler::nearest();
                 },
             ),
+            pearl_hit_sfx: assets.load("games/lobster/pearl_hit.ogg"),
+            pearl_miss_sfx: assets.load("games/lobster/pearl_miss.ogg"),
+            lobster_go: assets.load("games/lobster/lobster_go.ogg"),
             background: assets.load_with_settings(
                 "games/lobster/background.png",
                 |settings: &mut ImageLoaderSettings| {
@@ -167,6 +179,7 @@ pub fn spawn(
 
     let mut rng = rand::rng();
 
+    // some random shrimps that float around
     for i in 0..4 {
         let x = ((i as f32 * 180.0) + 110.0) - 400.0;
         let y = rng.random_range(100.0..200.0);
@@ -186,7 +199,22 @@ pub fn spawn(
             &assets,
             Vec2 { x: 240.0, y: -90.0 },
             &mut texture_atlas_layouts,
-        )).id();
+        ))
+        .id();
+
+    let lobster = commands
+        .spawn(lobster_char::lobster_char(
+            &assets,
+            Vec2 {
+                x: -240.0,
+                y: -100.0,
+            },
+            Vec2 {
+                x: 110.0,
+                y: -100.0,
+            },
+        ))
+        .id();
 
     commands
         .spawn((
@@ -197,7 +225,7 @@ pub fn spawn(
             DespawnOnExit(Screen::Gameplay),
             Propagate(camera::RENDERLAYER_GAME),
         ))
-        .add_children(&[level, oyster]);
+        .add_children(&[level, oyster, lobster]);
 
     commands
         .spawn((
@@ -211,13 +239,13 @@ pub fn spawn(
 }
 
 fn timed_out(_event: On<TimedOut>, mut tx: MessageWriter<NextGame>, state: Res<LobsterState>) {
-    if let Some(caught) = state.caught && caught {
+    if let Some(caught) = state.caught
+        && caught
+    {
         tx.write(NextGame::from_result(GameResult::Passsed));
         info!("grabbed - next game");
-    }
-    else {
+    } else {
         tx.write(NextGame::from_result(GameResult::Failed));
         info!("failed - next game");
     }
 }
-
