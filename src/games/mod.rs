@@ -48,7 +48,7 @@ impl Display for Game {
 pub enum GameState {
     #[default]
     None,
-    PreGame(GameInfo),
+    PreGame(GameTransitionInfo),
     Game(Game),
 }
 
@@ -58,6 +58,12 @@ pub struct GameInfo {
     pub kind: Game,
     pub controls: GameControlMethod,
     pub hint: &'static str,
+}
+
+#[derive(Debug, Default, Copy, Clone, Eq, PartialEq, Hash)]
+pub struct GameTransitionInfo {
+    pub next: GameInfo,
+    pub last: Option<GameResult>,
 }
 
 #[allow(unused)]
@@ -178,7 +184,10 @@ pub fn spawn_first(
     mut next_game_state: ResMut<NextState<GameState>>,
 ) {
     next_game.set(Game::Pre);
-    next_game_state.set(GameState::PreGame(get_info(Game::CatBonk)));
+    next_game_state.set(GameState::PreGame(GameTransitionInfo {
+        next: get_info(Game::CatBonk),
+        last: None,
+    }));
 }
 
 /// A system that triggers the next game to spawn when a `NextGame` message is sent
@@ -205,7 +214,10 @@ fn spawn_next(
 
         next_game.set(Game::Pre);
         game_data.apply_result(game.result, Duration::from_secs(5)); // TODO: Actually time passed between games?
-        next_game_state.set(GameState::PreGame(get_info(next_game_kind)));
+        next_game_state.set(GameState::PreGame(GameTransitionInfo {
+            next: get_info(next_game_kind),
+            last: Some(game.result),
+        }));
 
         info!(
             "Last game result {}. Next game {}.",

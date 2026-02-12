@@ -5,13 +5,14 @@ use bevy::prelude::*;
 use crate::{
     asset_tracking::LoadResource,
     games::{
-        Game, GameData, GameInfo, GameState,
+        Game, GameData, GameInfo, GameResult, GameState,
         pre_game::control_method::{ControlMethodAssets, control_method},
     },
     layout,
     screens::Screen,
     theme::widget,
     timeout::{TimedOut, Timeout, TimeoutLabel},
+    transition::TimedImageChange,
 };
 
 mod balance;
@@ -48,6 +49,10 @@ impl PreGameState {
 pub struct PreGameAssets {
     #[dependency]
     background1: Handle<Image>,
+    #[dependency]
+    pass_background: Handle<Image>,
+    #[dependency]
+    fail_background: Handle<Image>,
 }
 
 impl FromWorld for PreGameAssets {
@@ -56,7 +61,20 @@ impl FromWorld for PreGameAssets {
         let assets = world.resource::<AssetServer>();
         Self {
             background1: assets.load("games/pre_game/background1.jpeg"),
+            pass_background: assets.load("games/pre_game/pass.jpeg"),
+            fail_background: assets.load("games/pre_game/fail.jpeg"),
         }
+    }
+}
+
+fn image_from_result(result: Option<GameResult>, assets: &Res<PreGameAssets>) -> Handle<Image> {
+    if let Some(result) = result {
+        match result {
+            GameResult::Passsed => assets.pass_background.clone(),
+            GameResult::Failed => assets.fail_background.clone(),
+        }
+    } else {
+        assets.background1.clone()
     }
 }
 
@@ -71,7 +89,7 @@ pub fn spawn(
     data: Res<GameData>,
 ) {
     if let GameState::PreGame(info) = game_state.get() {
-        state.reset(time.elapsed(), *info);
+        state.reset(time.elapsed(), *&info.next);
 
         commands
             .spawn((
@@ -81,16 +99,23 @@ pub fn spawn(
                 Timeout::new(balance::COUNTDOWN),
                 children![(
                     layout::grid_parent(),
-                    ImageNode::new(game_assets.background1.clone()),
                     children![
                         (
+                            ImageNode::new(image_from_result(info.last, &game_assets)),
+                            TimedImageChange {
+                                transition_time: time.elapsed() + Duration::from_millis(500),
+                                next: game_assets.background1.clone(),
+                            },
+                            ZIndex(-1),
+                        ),
+                        (
                             layout::top_center(),
-                            children![widget::header(format!("{}", info.kind)),]
+                            children![widget::header(format!("{}", info.next.kind)),]
                         ),
                         (layout::bottom_right(), children![TimeoutLabel],),
                         (
                             layout::bottom_left(),
-                            children![control_method(info.controls, &control_assets)],
+                            children![control_method(info.next.controls, &control_assets)],
                         ),
                         (
                             layout::top_left(),

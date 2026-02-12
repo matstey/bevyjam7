@@ -27,10 +27,12 @@ pub(super) fn plugin(app: &mut App) {
 
 pub fn spawn(mut commands: Commands, game_state: Res<State<GameState>>, time: Res<Time>) {
     if let GameState::PreGame(game) = game_state.get() {
+        info!("Hint spawn");
         commands.spawn((
             widget::ui_root("Hint"),
             Visibility::Hidden,
-            children![widget::header(game.hint)],
+            ZIndex(2),
+            children![widget::header(game.next.hint)],
             Hint {
                 display_time: time.elapsed() + balance::HINT_DISPLAY_TIME,
                 destroy_time: time.elapsed()
@@ -49,8 +51,10 @@ pub fn update(
     for (entity, mut visability, hint) in query.iter_mut() {
         if *visability == Visibility::Hidden && time.elapsed() > hint.display_time {
             *visability = Visibility::Visible;
+            info!("Hint Visible");
         } else if time.elapsed() > hint.destroy_time {
             commands.entity(entity).despawn();
+            info!("Hint despawn");
         }
     }
 }
