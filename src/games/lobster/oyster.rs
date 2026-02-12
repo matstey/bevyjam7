@@ -1,4 +1,8 @@
+use std::time::Duration;
+
 use crate::animation::{AnimationIndices, AnimationTimer};
+use crate::audio::sound_effect;
+use crate::lifetime::DespawnAfter;
 use bevy::prelude::*;
 use rand::Rng;
 
@@ -8,6 +12,9 @@ use crate::games::lobster::{LobsterAssets, LobsterState, balance};
 pub struct Oyster {
     is_open: bool,
 }
+
+#[derive(Component)]
+pub struct PlaySoundDelayed(Timer, Handle<AudioSource>);
 
 #[derive(Debug, Default, Component)]
 pub struct Pearl;
@@ -103,11 +110,44 @@ pub fn update(
 }
 
 pub fn try_grab(
-    oyster: Single<(&Oyster, &mut CloseTimer, &mut OpenTimer)>,
+    oyster: Single<(Entity, &Oyster, &mut CloseTimer, &mut OpenTimer)>,
+    pearl: Single<(Entity, &Pearl)>,
     mut state: ResMut<LobsterState>,
+    mut commands: Commands,
+    assets: Res<LobsterAssets>,
+    time: Res<Time>,
 ) {
-    let (oyster, mut close_timer, mut open_timer) = oyster.into_inner();
+    let (entity, oyster, mut close_timer, mut open_timer) = oyster.into_inner();
     close_timer.pause();
     open_timer.pause();
     state.caught = Some(oyster.is_open);
+
+    let sfx = if oyster.is_open {
+        assets.pearl_hit_sfx.clone()
+    } else {
+        assets.pearl_miss_sfx.clone()
+    };
+    commands.entity(entity).insert(PlaySoundDelayed(
+        Timer::from_seconds(0.4, TimerMode::Once),
+        sfx,
+    ));
+
+    let (pearl_entity, _) = pearl.into_inner();
+    commands.entity(pearl_entity).insert(DespawnAfter::new(
+        time.elapsed(),
+        Duration::from_secs_f32(0.4),
+    ));
+}
+
+pub fn play_sound_after_delay(
+    mut commands: Commands,
+    time: Res<Time>,
+    mut query: Query<&mut PlaySoundDelayed>,
+) {
+    for mut timer in query.iter_mut() {
+        timer.0.tick(time.delta());
+        if timer.0.just_finished() {
+            commands.spawn(sound_effect(timer.1.clone()));
+        }
+    }
 }

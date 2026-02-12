@@ -40,6 +40,7 @@ pub(super) fn plugin(app: &mut App) {
         Update,
         (
             oyster::update,
+            oyster::play_sound_after_delay,
             oyster::try_grab.run_if(input_just_pressed(KeyCode::Space)),
             lobster_char::try_grab.run_if(input_just_pressed(KeyCode::Space)),
             lobster_char::update_move,
