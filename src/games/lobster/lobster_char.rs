@@ -1,8 +1,8 @@
 use bevy::prelude::*;
 use std::time::Duration;
 
-use crate::games::lobster::LobsterAssets;
 use crate::audio::sound_effect;
+use crate::games::lobster::LobsterAssets;
 
 #[derive(Debug, Default, Component)]
 pub struct MoveToTarget {
@@ -54,7 +54,12 @@ pub fn update_move(
     }
 }
 
-pub fn try_grab(mut commands: Commands, assets: Res<LobsterAssets>, time: Res<Time>, mut lobster: Single<&mut MoveToTarget, With<Lobster>>) {
+pub fn try_grab(
+    mut commands: Commands,
+    assets: Res<LobsterAssets>,
+    time: Res<Time>,
+    mut lobster: Single<&mut MoveToTarget, With<Lobster>>,
+) {
     lobster.start_time = Some(time.elapsed());
     commands.spawn(sound_effect(assets.lobster_go.clone()));
 }

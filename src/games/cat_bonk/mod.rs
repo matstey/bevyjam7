@@ -40,6 +40,10 @@ pub struct CatBonkAssets {
     cat: Handle<Image>,
     #[dependency]
     hit_sound: Handle<AudioSource>,
+    #[dependency]
+    cat_sounds: Vec<Handle<AudioSource>>,
+    #[dependency]
+    cat_hit_sounds: Vec<Handle<AudioSource>>,
 }
 
 impl FromWorld for CatBonkAssets {
@@ -66,6 +70,16 @@ impl FromWorld for CatBonkAssets {
                 },
             ),
             hit_sound: assets.load("games/cat/hit.ogg"),
+            cat_sounds: vec![
+                assets.load("games/cat/cat1.ogg"),
+                assets.load("games/cat/cat2.ogg"),
+                assets.load("games/cat/cat3.ogg"),
+            ],
+            cat_hit_sounds: vec![
+                assets.load("games/cat/cat_hit1.ogg"),
+                assets.load("games/cat/cat_hit2.ogg"),
+                assets.load("games/cat/cat_hit3.ogg"),
+            ],
         }
     }
 }

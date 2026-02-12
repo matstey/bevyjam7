@@ -1,5 +1,7 @@
 use bevy::prelude::*;
-use rand::Rng;
+use rand::prelude::*;
+
+use crate::audio::sound_effect;
 use std::time::Duration;
 
 use crate::games::cat_bonk::{CatBonkAssets, CatBonkState, balance};
@@ -44,6 +46,8 @@ pub fn cat(
 pub fn update(
     time: Res<Time>,
     state: Res<CatBonkState>,
+    mut commands: Commands,
+    assets: Res<CatBonkAssets>,
     cats: Query<(&Cat, &mut Visibility, &mut Sprite)>,
 ) {
     let elapsed = time.elapsed() - state.start_time;
@@ -51,6 +55,10 @@ pub fn update(
     for (cat, mut visibility, mut sprite) in cats {
         if *visibility == Visibility::Hidden && elapsed > cat.popup_delay {
             visibility.toggle_visible_hidden();
+
+            let rng = &mut rand::rng();
+            let hit_sound = assets.cat_sounds.choose(rng).unwrap().clone();
+            commands.spawn(sound_effect(hit_sound));
         }
 
         if elapsed > cat.popup_delay + Duration::from_secs_f32(0.3)
@@ -63,9 +71,18 @@ pub fn update(
     }
 }
 
-pub fn on_hit(click: On<Pointer<Click>>, mut commands: Commands, mut state: ResMut<CatBonkState>) {
+pub fn on_hit(
+    click: On<Pointer<Click>>,
+    mut commands: Commands,
+    assets: Res<CatBonkAssets>,
+    mut state: ResMut<CatBonkState>,
+) {
     commands.entity(click.entity).despawn();
-    //todo: play sound
+
+    let rng = &mut rand::rng();
+    let hit_sound = assets.cat_hit_sounds.choose(rng).unwrap().clone();
+    commands.spawn(sound_effect(hit_sound));
+
     //todo: hit effect?
 
     state.hit_count += 1;
