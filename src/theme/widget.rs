@@ -41,6 +41,16 @@ pub fn header(text: impl Into<String>) -> impl Bundle {
     )
 }
 
+pub fn header_with_color(text: impl Into<String>, color: Color) -> impl Bundle {
+    (
+        Name::new("Header"),
+        Text(text.into()),
+        TextFont::from_font_size(100.0),
+        TextColor(color),
+        Floats,
+    )
+}
+
 /// A simple text label.
 pub fn label(text: impl Into<String>) -> impl Bundle {
     (

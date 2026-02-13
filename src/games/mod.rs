@@ -1,6 +1,11 @@
-use std::{fmt::Display, time::Duration};
+use std::{fmt, time::Duration};
 
-use bevy::prelude::*;
+use bevy::{color::palettes::css, prelude::*};
+
+use crate::{
+    asset_tracking::LoadResource, controls::progress_bar::ProgressBar, float::Floats,
+    screens::Screen, theme::widget,
+};
 
 mod balance;
 mod camera;
@@ -11,6 +16,30 @@ mod example;
 mod lobster;
 mod popup;
 mod pre_game;
+
+pub(super) fn plugin(app: &mut App) {
+    app.load_resource::<GameAssets>();
+    app.init_state::<Game>();
+    app.init_state::<GameState>();
+    app.init_resource::<GameData>();
+    app.add_message::<NextGame>();
+    // Has to be in post update to make sure any request for the next level are processed before the next loop starts
+    app.add_systems(PostUpdate, spawn_next);
+    app.add_systems(OnEnter(Screen::Gameplay), spawn_health);
+    app.add_systems(Update, update_health_bar);
+
+    // Register all mini games here
+    app.add_plugins((
+        camera::plugin,
+        pre_game::plugin,
+        example::plugin,
+        duck::plugin,
+        catch::plugin,
+        cat_bonk::plugin,
+        popup::plugin,
+        lobster::plugin,
+    ));
+}
 
 #[derive(Debug, Default, Copy, Clone, Eq, PartialEq, Hash, States)]
 pub enum Game {
@@ -25,7 +54,7 @@ pub enum Game {
     Lobster,
 }
 
-impl Display for Game {
+impl fmt::Display for Game {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
@@ -73,10 +102,11 @@ pub enum GameControlMethod {
     Wasd,
     Mouse,
     Keyboard,
+    Space,
     //Keys(Vec<KeyCode>),
 }
 
-impl Display for GameControlMethod {
+impl fmt::Display for GameControlMethod {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
@@ -85,6 +115,7 @@ impl Display for GameControlMethod {
                 Self::Wasd => "WASD",
                 Self::Mouse => "Mouse",
                 Self::Keyboard => "Keyboard",
+                Self::Space => "Space",
             }
         )
     }
@@ -96,6 +127,8 @@ pub struct GameData {
     pub health: f32,
     pub round: u32,
     pub elapsed: Duration,
+    pub passed: usize,
+    pub failed: usize,
 }
 
 impl Default for GameData {
@@ -104,6 +137,8 @@ impl Default for GameData {
             health: Default::default(),
             round: 1,
             elapsed: Default::default(),
+            passed: 0,
+            failed: 0,
         }
     }
 }
@@ -112,8 +147,14 @@ impl GameData {
     fn apply_result(&mut self, result: GameResult, delta: Duration) {
         self.round += 1;
         match result {
-            GameResult::Passsed => self.adjust_health(balance::PASSED_REWARD),
-            GameResult::Failed => self.adjust_health(-balance::FAILED_COST),
+            GameResult::Passsed => {
+                self.passed += 1;
+                self.adjust_health(balance::PASSED_REWARD);
+            }
+            GameResult::Failed => {
+                self.failed += 1;
+                self.adjust_health(-balance::FAILED_COST);
+            }
         };
         self.elapsed += delta;
     }
@@ -123,7 +164,7 @@ impl GameData {
     }
 
     pub fn fever_grade(&self) -> f32 {
-        self.round as f32 // TODO: Added health
+        (self.failed as f32 / self.passed.max(1) as f32) + 1.0 // Range has to start at 1.0
     }
 }
 
@@ -144,7 +185,7 @@ pub enum GameResult {
     Failed,
 }
 
-impl Display for GameResult {
+impl fmt::Display for GameResult {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
@@ -157,25 +198,71 @@ impl Display for GameResult {
     }
 }
 
-pub(super) fn plugin(app: &mut App) {
-    app.init_state::<Game>();
-    app.init_state::<GameState>();
-    app.init_resource::<GameData>();
-    app.add_message::<NextGame>();
-    // Has to be in post update to make sure any request for the next level are processed before the next loop starts
-    app.add_systems(PostUpdate, spawn_next);
+#[derive(Resource, Asset, Clone, Reflect)]
+#[reflect(Resource)]
+pub struct GameAssets {
+    #[dependency]
+    thermometer: Handle<Image>,
+    #[dependency]
+    thermometer_background: Handle<Image>,
+}
 
-    // Register all mini games here
-    app.add_plugins((
-        camera::plugin,
-        pre_game::plugin,
-        example::plugin,
-        duck::plugin,
-        catch::plugin,
-        cat_bonk::plugin,
-        popup::plugin,
-        lobster::plugin,
+impl FromWorld for GameAssets {
+    /// Load all assets we want for this game
+    fn from_world(world: &mut World) -> Self {
+        let assets = world.resource::<AssetServer>();
+        Self {
+            thermometer: assets.load("thermometer.png"),
+            thermometer_background: assets.load("thermometer_background.png"),
+        }
+    }
+}
+
+#[derive(Debug, Component)]
+pub struct HealthBar;
+
+fn spawn_health(mut commands: Commands, assets: Res<GameAssets>) {
+    commands.spawn((
+        widget::ui_root("heath"),
+        ZIndex(3),
+        DespawnOnExit(Screen::Gameplay),
+        Floats,
+        children![
+            (
+                Node {
+                    right: px(0),
+                    position_type: PositionType::Absolute,
+                    width: px(120.5),
+                    height: px(299.5),
+                    ..default()
+                },
+                ImageNode::new(assets.thermometer_background.clone()),
+                Pickable::IGNORE,
+            ),
+            (
+                Node {
+                    right: px(0),
+                    position_type: PositionType::Absolute,
+                    width: px(120.5),
+                    height: px(299.5),
+                    ..default()
+                },
+                HealthBar,
+                ProgressBar {
+                    color: css::RED.into(),
+                    color_texture: assets.thermometer.clone(),
+                    ..default()
+                },
+                Pickable::IGNORE,
+            )
+        ],
     ));
+}
+
+fn update_health_bar(mut query: Query<&mut ProgressBar, With<HealthBar>>, data: Res<GameData>) {
+    for mut progress_bar in query.iter_mut() {
+        progress_bar.progress = 0.35 + (data.fever_grade() / 10.0); // TODO: Decide how his logic should be. When do u die?
+    }
 }
 
 /// A system that triggers the first game to spawn

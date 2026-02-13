@@ -50,6 +50,8 @@ pub struct PreGameAssets {
     #[dependency]
     background1: Handle<Image>,
     #[dependency]
+    background2: Handle<Image>,
+    #[dependency]
     pass_background: Handle<Image>,
     #[dependency]
     fail_background: Handle<Image>,
@@ -61,6 +63,7 @@ impl FromWorld for PreGameAssets {
         let assets = world.resource::<AssetServer>();
         Self {
             background1: assets.load("games/pre_game/background1.jpeg"),
+            background2: assets.load("games/pre_game/background2.jpeg"),
             pass_background: assets.load("games/pre_game/pass.jpeg"),
             fail_background: assets.load("games/pre_game/fail.jpeg"),
         }
@@ -72,6 +75,17 @@ fn image_from_result(result: Option<GameResult>, assets: &Res<PreGameAssets>) ->
         match result {
             GameResult::Passsed => assets.pass_background.clone(),
             GameResult::Failed => assets.fail_background.clone(),
+        }
+    } else {
+        assets.background1.clone()
+    }
+}
+
+fn background(result: Option<GameResult>, assets: &Res<PreGameAssets>) -> Handle<Image> {
+    if let Some(result) = result {
+        match result {
+            GameResult::Passsed => assets.background1.clone(),
+            GameResult::Failed => assets.background2.clone(),
         }
     } else {
         assets.background1.clone()
@@ -104,7 +118,7 @@ pub fn spawn(
                             ImageNode::new(image_from_result(info.last, &game_assets)),
                             TimedImageChange {
                                 transition_time: time.elapsed() + Duration::from_millis(500),
-                                next: game_assets.background1.clone(),
+                                next: background(info.last, &game_assets),
                             },
                             ZIndex(-1),
                         ),

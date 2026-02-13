@@ -8,7 +8,7 @@ use crate::{
         GameState,
         pre_game::{GAME, balance},
     },
-    theme::widget,
+    theme::{palette::NEON_GREEN, widget},
 };
 
 #[derive(Debug, Copy, Clone, Component)]
@@ -32,7 +32,7 @@ pub fn spawn(mut commands: Commands, game_state: Res<State<GameState>>, time: Re
             widget::ui_root("Hint"),
             Visibility::Hidden,
             ZIndex(2),
-            children![widget::header(game.next.hint)],
+            children![widget::header_with_color(game.next.hint, NEON_GREEN)],
             Hint {
                 display_time: time.elapsed() + balance::HINT_DISPLAY_TIME,
                 destroy_time: time.elapsed()

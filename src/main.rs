@@ -6,6 +6,7 @@
 mod animation;
 mod asset_tracking;
 mod audio;
+mod controls;
 #[cfg(feature = "dev")]
 mod dev_tools;
 mod easing;
@@ -83,6 +84,7 @@ impl Plugin for AppPlugin {
             timeout::plugin,
             animation::plugin,
             transition::plugin,
+            controls::plugin,
         ));
 
         // Order new `AppSystems` variants by adding them here:

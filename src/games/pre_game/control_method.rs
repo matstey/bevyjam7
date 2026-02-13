@@ -15,6 +15,8 @@ pub struct ControlMethodAssets {
     mouse: Handle<Image>,
     #[dependency]
     wasd: Handle<Image>,
+    #[dependency]
+    space: Handle<Image>,
 }
 
 impl FromWorld for ControlMethodAssets {
@@ -25,6 +27,7 @@ impl FromWorld for ControlMethodAssets {
             keyboard: assets.load("games/pre_game/keyboard.png"),
             mouse: assets.load("games/pre_game/mouse.png"),
             wasd: assets.load("games/pre_game/wasd.png"),
+            space: assets.load("games/pre_game/space.png"),
         }
     }
 }
@@ -32,16 +35,7 @@ impl FromWorld for ControlMethodAssets {
 pub fn control_method(method: GameControlMethod, assets: &ControlMethodAssets) -> impl Bundle {
     (
         Name::new("control_method"),
-        ImageNode::new(asset_from_method(method, assets)).with_color(theme::palette::HEADER_TEXT),
-        Node {
-            border_radius: BorderRadius::all(Val::Px(10.0)),
-            ..default()
-        },
-        Outline {
-            width: px(6),
-            offset: px(6),
-            color: theme::palette::HEADER_TEXT,
-        },
+        ImageNode::new(asset_from_method(method, assets)).with_color(theme::palette::NEON_GREEN),
         Floats,
     )
 }
@@ -51,5 +45,6 @@ fn asset_from_method(method: GameControlMethod, assets: &ControlMethodAssets) ->
         GameControlMethod::Wasd => assets.wasd.clone(),
         GameControlMethod::Mouse => assets.mouse.clone(),
         GameControlMethod::Keyboard => assets.wasd.clone(),
+        GameControlMethod::Space => assets.space.clone(),
     }
 }
