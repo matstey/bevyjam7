@@ -26,7 +26,7 @@ pub fn lobster_char(assets: &LobsterAssets, pos: Vec2, target: Vec2) -> impl Bun
         Visibility::default(),
         Sprite::from_image(assets.lobster.clone()),
         MoveToTarget {
-            target: target,
+            target,
             time: 0.5,
             start_time: None,
             start_location: pos,

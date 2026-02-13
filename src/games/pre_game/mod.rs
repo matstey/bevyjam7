@@ -103,7 +103,7 @@ pub fn spawn(
     data: Res<GameData>,
 ) {
     if let GameState::PreGame(info) = game_state.get() {
-        state.reset(time.elapsed(), *&info.next);
+        state.reset(time.elapsed(), info.next);
 
         commands
             .spawn((

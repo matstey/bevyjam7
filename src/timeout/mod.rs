@@ -25,7 +25,7 @@ pub struct Timeout {
 
 impl Timeout {
     pub fn new(time: Duration) -> Self {
-        Self { time, ..default() }
+        Self { time }
     }
 }
 
