@@ -14,7 +14,7 @@ use crate::{
     asset_tracking::LoadResource,
     color::color_u32,
     games::{
-        Game, GameControlMethod, GameInfo, GameResult, NextGame,
+        Game, GameControlMethod, GameData, GameInfo, GameResult, NextGame,
         camera::{self, shake::CameraShakeConfig},
     },
     screens::Screen,
@@ -89,29 +89,29 @@ impl FromWorld for CatBonkAssets {
 #[derive(Debug, Default, Clone, Copy, Resource)]
 pub struct CatBonkState {
     pub start_time: Duration,
-    pub target_count: u32,
-    pub hit_count: u32,
+    pub target_count: usize,
+    pub hit_count: usize,
 }
 
 impl CatBonkState {
     /// Called when starting this game to make sure the data is reset
     /// Assuming that is what we want.
-    pub fn reset(&mut self, start_time: Duration) {
+    pub fn reset(&mut self, start_time: Duration, level: usize) {
         self.start_time = start_time;
-        // todo: scale from difficulty
-        self.target_count = 6;
+        self.target_count = balance::NUM_CATS + (level * balance::CATS_PER_LEVEL);
         self.hit_count = 0;
     }
 }
 
 pub fn spawn(
     mut commands: Commands,
+    gamedata: Res<GameData>,
     assets: Res<CatBonkAssets>,
     mut state: ResMut<CatBonkState>,
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
     time: Res<Time>,
 ) {
-    state.reset(time.elapsed());
+    state.reset(time.elapsed(), gamedata.level);
 
     // hardcoded list of possible cat spawn locations...
     // could have done something smarter here, but theres not too many locations

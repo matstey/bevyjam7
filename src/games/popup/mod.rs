@@ -12,7 +12,7 @@ use crate::{
     asset_tracking::LoadResource,
     color::color_u32,
     games::{
-        Game, GameControlMethod, GameInfo, GameResult, NextGame,
+        Game, GameControlMethod, GameData, GameInfo, GameResult, NextGame,
         camera::{self, shake::CameraShakeConfig},
     },
     screens::Screen,
@@ -58,15 +58,15 @@ pub const fn get_info() -> GameInfo {
 #[derive(Debug, Default, Clone, Copy, Resource)]
 pub struct PopupState {
     pub start_time: Duration,
-    pub remaining: u32,
+    pub remaining: usize,
 }
 
 impl PopupState {
     /// Called when starting this game to make sure the data is reset
     /// Assuming that is what we want.
-    pub fn reset(&mut self, start_time: Duration) {
+    pub fn reset(&mut self, start_time: Duration, level: usize) {
         self.start_time = start_time;
-        self.remaining = 5;
+        self.remaining = balance::NUM_POPUPS + (level * balance::POPUPS_PER_LEVEL);
     }
 }
 
@@ -160,11 +160,12 @@ impl FromWorld for PopupAssets {
 /// A system to spawn the example level
 pub fn spawn(
     mut commands: Commands,
+    gamedata: Res<GameData>,
     assets: Res<PopupAssets>,
     mut state: ResMut<PopupState>,
     time: Res<Time>,
 ) {
-    state.reset(time.elapsed());
+    state.reset(time.elapsed(), gamedata.level);
     commands.spawn((
         DespawnOnExit(GAME),             // When exiting this game despawn this entity
         DespawnOnExit(Screen::Gameplay), // When exiting the top level game despawn this entity

@@ -128,6 +128,7 @@ pub struct GameData {
     pub elapsed: Duration,
     pub passed: usize,
     pub failed: usize,
+    pub level: usize,
     pub random: usize,
 }
 
@@ -138,6 +139,7 @@ impl Default for GameData {
             elapsed: Default::default(),
             passed: 0,
             failed: 0,
+            level: 0,
             random: 0,
         }
     }
@@ -155,6 +157,7 @@ impl GameData {
             }
         };
         self.elapsed += delta;
+        self.level = self.round / balance::ROUNDS_PER_LEVEL;
     }
 
     pub fn fever_grade(&self) -> f32 {
@@ -181,6 +184,7 @@ impl GameData {
         self.round = 1;
         self.elapsed = Duration::default();
         let mut rng = rand::rng();
+        self.level = 0;
         self.random = rng.random_range(0..20);
     }
 }

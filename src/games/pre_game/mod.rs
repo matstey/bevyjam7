@@ -103,6 +103,8 @@ pub fn spawn(
             data.fever_grade_nominal()
         );
 
+        info!("Level: {}", data.level);
+
         commands
             .spawn((
                 widget::ui_root("pre_game_ui"),

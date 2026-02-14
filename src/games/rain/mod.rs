@@ -27,6 +27,7 @@ use crate::{
 };
 
 use crate::animation::{AnimationIndices, AnimationTimer};
+use crate::games::GameData;
 
 mod animation;
 mod balance;
@@ -235,9 +236,12 @@ pub fn spawn(
     assets: Res<RainAssets>,
     mut state: ResMut<RainState>,
     time: Res<Time>,
+    gamedata: Res<GameData>,
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
 ) {
     state.reset(time.elapsed());
+
+    let level_multiplier = 1.0 + (gamedata.level as f32 * balance::LEVEL_MULTIPLIER);
 
     let layout = TextureAtlasLayout::from_grid(UVec2 { x: 200, y: 120 }, 2, 2, None, None);
     let texture_atlas_layout = texture_atlas_layouts.add(layout);
@@ -256,8 +260,12 @@ pub fn spawn(
             AnimationIndices { first: 0, last: 3 },
             AnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)),
             children![
-                umbrella::umbrella(&assets),
-                duck::duck(&assets, &mut texture_atlas_layouts)
+                umbrella::umbrella(&assets, balance::UMBRELLA_MAX_VELOCITY * level_multiplier),
+                duck::duck(
+                    &assets,
+                    &mut texture_atlas_layouts,
+                    balance::PLAYER_MOVEMENT_SPEED * level_multiplier
+                )
             ],
         ))
         .id();
