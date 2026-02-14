@@ -10,13 +10,14 @@ use bevy::{
 use crate::{
     AppSystems, PausableSystems,
     asset_tracking::LoadResource,
+    color::color_u32,
     games::{
         Game, GameControlMethod, GameInfo, GameResult, NextGame,
         camera::{self, shake::CameraShakeConfig},
     },
     screens::Screen,
     theme::widget,
-    timeout::{TimedOut, Timeout, TimeoutLabel},
+    timeout::{TimedOut, Timeout, TimeoutBar},
 };
 
 mod balance;
@@ -49,6 +50,7 @@ pub const fn get_info() -> GameInfo {
         kind: GAME,
         controls: GameControlMethod::Mouse,
         hint: "Close",
+        color: 0x5555FFFF,
     }
 }
 
@@ -216,7 +218,9 @@ pub fn spawn(
             DespawnOnExit(GAME), // When exiting this game despawn this entity
             DespawnOnExit(Screen::Gameplay), // When exiting the top level game despawn this entity
             Timeout::new(balance::GAME_DURATION),
-            children![TimeoutLabel],
+            children![TimeoutBar::from_foreground_color(color_u32(
+                get_info().color
+            ))],
         ))
         .observe(timed_out);
 }

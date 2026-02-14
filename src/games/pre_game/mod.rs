@@ -5,6 +5,7 @@ use bevy::prelude::*;
 use crate::{
     asset_tracking::LoadResource,
     backgrounds::BackgroundAssets,
+    color::color_u32,
     games::{
         Game, GameData, GameInfo, GameResult, GameState,
         pre_game::control_method::{ControlMethodAssets, control_method},
@@ -12,7 +13,7 @@ use crate::{
     layout,
     screens::Screen,
     theme::widget,
-    timeout::{TimedOut, Timeout, TimeoutLabel},
+    timeout::{TimedOut, Timeout},
     transition::TimedImageChange,
 };
 
@@ -135,13 +136,12 @@ pub fn spawn(
                             ZIndex(-1),
                         ),
                         (
-                            layout::top_center(),
-                            children![widget::header(format!("{}", info.next.kind)),]
-                        ),
-                        (layout::bottom_right(), children![TimeoutLabel],),
-                        (
-                            layout::bottom_left(),
-                            children![control_method(info.next.controls, &control_assets)],
+                            layout::center(),
+                            children![control_method(
+                                info.next.controls,
+                                &control_assets,
+                                color_u32(info.next.color)
+                            )],
                         ),
                         (
                             layout::top_left(),

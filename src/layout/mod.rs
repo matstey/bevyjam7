@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 
+#[allow(dead_code)]
 pub fn grid_parent() -> Node {
     Node {
         display: Display::Grid,
@@ -9,10 +10,10 @@ pub fn grid_parent() -> Node {
     }
 }
 
-pub fn top_center() -> Node {
+#[allow(dead_code)]
+pub fn center() -> Node {
     Node {
-        margin: auto().horizontal(),
-        top: px(10),
+        margin: UiRect::all(Val::Auto),
         padding: UiRect::all(Val::Px(30.0)),
         display: Display::Block,
         position_type: PositionType::Absolute,
@@ -20,6 +21,19 @@ pub fn top_center() -> Node {
     }
 }
 
+#[allow(dead_code)]
+pub fn top_center() -> Node {
+    Node {
+        margin: auto().horizontal(),
+        top: percent(10),
+        padding: UiRect::all(Val::Px(30.0)),
+        display: Display::Block,
+        position_type: PositionType::Absolute,
+        ..default()
+    }
+}
+
+#[allow(dead_code)]
 pub fn top_left() -> Node {
     Node {
         left: px(10),
@@ -31,6 +45,7 @@ pub fn top_left() -> Node {
     }
 }
 
+#[allow(dead_code)]
 pub fn bottom_right() -> Node {
     Node {
         right: px(10),
@@ -42,6 +57,7 @@ pub fn bottom_right() -> Node {
     }
 }
 
+#[allow(dead_code)]
 pub fn bottom_left() -> Node {
     Node {
         left: px(10),

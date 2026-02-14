@@ -47,6 +47,7 @@ pub const fn get_info() -> GameInfo {
         kind: GAME,
         controls: GameControlMethod::Wasd,
         hint: "Catch",
+        color: 0xFFFFFFFF,
     }
 }
 

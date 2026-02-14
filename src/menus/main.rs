@@ -3,6 +3,7 @@
 use bevy::prelude::*;
 
 use crate::{
+    app,
     menus::Menu,
     screens::{self},
     theme::widget,
@@ -19,14 +20,14 @@ fn spawn_main_menu(mut commands: Commands) {
         DespawnOnExit(Menu::Main),
         #[cfg(not(target_family = "wasm"))]
         children![
-            widget::header("<Game Name Here>"),
+            widget::header(app::NAME),
             widget::button("Play", screens::enter_loading_or_gameplay_screen),
             widget::button("Settings", open_settings_menu),
             widget::button("Exit", exit_app),
         ],
         #[cfg(target_family = "wasm")]
         children![
-            widget::header("<Game Name Here>"),
+            widget::header(app::NAME),
             widget::button("Play", screens::enter_loading_or_gameplay_screen),
             widget::button("Settings", open_settings_menu),
         ],

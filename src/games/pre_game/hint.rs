@@ -4,11 +4,13 @@ use bevy::prelude::*;
 
 use crate::{
     AppSystems, PausableSystems,
+    color::color_u32,
     games::{
         GameState,
         pre_game::{GAME, balance},
     },
-    theme::{palette::NEON_GREEN, widget},
+    layout,
+    theme::widget,
 };
 
 #[derive(Debug, Copy, Clone, Component)]
@@ -32,7 +34,10 @@ pub fn spawn(mut commands: Commands, game_state: Res<State<GameState>>, time: Re
             widget::ui_root("Hint"),
             Visibility::Hidden,
             ZIndex(2),
-            children![widget::header_with_color(game.next.hint, NEON_GREEN)],
+            children![(
+                layout::top_center(),
+                widget::header_with_color(game.next.hint, color_u32(game.next.color))
+            )],
             Hint {
                 display_time: time.elapsed() + balance::HINT_DISPLAY_TIME,
                 destroy_time: time.elapsed()

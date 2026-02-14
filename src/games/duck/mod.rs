@@ -48,6 +48,7 @@ pub const fn get_info() -> GameInfo {
         kind: GAME,
         controls: GameControlMethod::Wasd,
         hint: "Move",
+        color: 0xFFFFFFFF,
     }
 }
 
