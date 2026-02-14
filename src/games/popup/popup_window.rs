@@ -12,7 +12,7 @@ pub struct PopupWindow {
     popup_delay: Duration,
 }
 
-pub fn popup_window(assets: &PopupAssets, index: u32) -> impl Bundle {
+pub fn popup_window(assets: &PopupAssets, index: usize) -> impl Bundle {
     let mut rng = rand::rng();
     let idx = rng.random_range(0..assets.popups.len());
     let asset = assets.popups[idx].clone();
