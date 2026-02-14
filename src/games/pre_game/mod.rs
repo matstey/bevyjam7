@@ -83,17 +83,6 @@ fn image_from_result(
     }
 }
 
-fn background(result: Option<GameResult>, assets: &Res<BackgroundAssets>) -> Handle<Image> {
-    if let Some(result) = result {
-        match result {
-            GameResult::Passsed => assets.background1.clone(),
-            GameResult::Failed => assets.background2.clone(),
-        }
-    } else {
-        assets.background1.clone()
-    }
-}
-
 /// A system to spawn the example level
 pub fn spawn(
     mut commands: Commands,
@@ -133,7 +122,7 @@ pub fn spawn(
                             )),
                             TimedImageChange {
                                 transition_time: time.elapsed() + Duration::from_millis(500),
-                                next: background(info.last, &background_assets),
+                                next: background_assets.from_index(data.round + data.random),
                             },
                             ZIndex(-1),
                         ),

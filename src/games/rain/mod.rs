@@ -241,7 +241,7 @@ pub fn spawn(
 ) {
     state.reset(time.elapsed());
 
-    let level_multiplier = gamedata.level as f32 * balance::LEVEL_MULTIPLIER;
+    let level_multiplier = 1.0 + (gamedata.level as f32 * balance::LEVEL_MULTIPLIER);
 
     let layout = TextureAtlasLayout::from_grid(UVec2 { x: 200, y: 120 }, 2, 2, None, None);
     let texture_atlas_layout = texture_atlas_layouts.add(layout);

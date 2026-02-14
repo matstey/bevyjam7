@@ -16,7 +16,7 @@ pub(super) fn plugin(app: &mut App) {
 pub fn spawn(mut commands: Commands, assets: Res<BackgroundAssets>, data: ResMut<GameData>) {
     commands.spawn((
         widget::ui_root("Game Over"),
-        ImageNode::new(assets.background3.clone()),
+        ImageNode::new(assets.from_index(data.random)),
         DespawnOnExit(SCREEN),
         children![
             widget::header("Game Over"),

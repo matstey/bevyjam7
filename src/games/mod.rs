@@ -1,6 +1,7 @@
 use std::{fmt, time::Duration};
 
 use bevy::prelude::*;
+use rand::Rng;
 
 use crate::screens::Screen;
 
@@ -123,23 +124,23 @@ impl fmt::Display for GameControlMethod {
 /// Global game state updated after each game completes
 #[derive(Debug, Copy, Clone, Resource)]
 pub struct GameData {
-    pub health: f32,
-    pub round: u32,
+    pub round: usize,
     pub elapsed: Duration,
     pub passed: usize,
     pub failed: usize,
-    pub level: u32,
+    pub level: usize,
+    pub random: usize,
 }
 
 impl Default for GameData {
     fn default() -> Self {
         Self {
-            health: Default::default(),
             round: 1,
             elapsed: Default::default(),
             passed: 0,
             failed: 0,
-            level: 1,
+            level: 0,
+            random: 0,
         }
     }
 }
@@ -150,19 +151,13 @@ impl GameData {
         match result {
             GameResult::Passsed => {
                 self.passed += 1;
-                self.adjust_health(balance::PASSED_REWARD);
             }
             GameResult::Failed => {
                 self.failed += 1;
-                self.adjust_health(-balance::FAILED_COST);
             }
         };
         self.elapsed += delta;
-        self.level = (self.round / balance::ROUNDS_PER_LEVEL) + 1;
-    }
-
-    fn adjust_health(&mut self, adjustment: f32) {
-        self.health = (self.health + adjustment).clamp(0.0, balance::MAX_FEVER);
+        self.level = self.round / balance::ROUNDS_PER_LEVEL;
     }
 
     pub fn fever_grade(&self) -> f32 {
@@ -181,6 +176,16 @@ impl GameData {
 
     pub fn dead(&self) -> bool {
         self.fever_grade() >= balance::MAX_FEVER
+    }
+
+    pub fn reset(&mut self) {
+        self.passed = 0;
+        self.failed = 0;
+        self.round = 1;
+        self.elapsed = Duration::default();
+        let mut rng = rand::rng();
+        self.level = 0;
+        self.random = rng.random_range(0..20);
     }
 }
 
@@ -216,9 +221,11 @@ impl fmt::Display for GameResult {
 
 /// A system that triggers the first game to spawn
 pub fn spawn_first(
+    mut game_data: ResMut<GameData>,
     mut next_game: ResMut<NextState<Game>>,
     mut next_game_state: ResMut<NextState<GameState>>,
 ) {
+    game_data.reset();
     next_game.set(Game::Pre);
     next_game_state.set(GameState::PreGame(GameTransitionInfo {
         next: get_info(Game::Rain),
