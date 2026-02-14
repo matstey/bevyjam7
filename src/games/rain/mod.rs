@@ -2,9 +2,14 @@ use std::time::Duration;
 
 use bevy::{
     app::Propagate,
+    camera::RenderTarget,
     camera::ScalingMode,
     image::{ImageLoaderSettings, ImageSampler},
     prelude::*,
+    render::render_resource::{
+        Extent3d, TextureDescriptor, TextureDimension, TextureFormat, TextureUsages,
+    },
+    window::WindowResized,
 };
 
 use crate::{
@@ -23,17 +28,13 @@ use crate::animation::{AnimationIndices, AnimationTimer};
 
 mod balance;
 mod umbrella;
+mod duck;
 
 const GAME: Game = Game::Rain;
 
 pub(super) fn plugin(app: &mut App) {
-    // Register our assets to be loaded when the application is loading
     app.load_resource::<RainAssets>();
-
-    // Register our spawn system to be triggered when this game is selected
     app.add_systems(OnEnter(GAME), spawn);
-
-    // Register all systems that are to be run when this game is active
     app.add_systems(
         Update,
         (update, umbrella::update)
@@ -113,6 +114,18 @@ impl FromWorld for RainAssets {
     }
 }
 
+/// Low-resolution texture that contains the pixel-perfect world.
+/// Canvas itself is rendered to the high-resolution world.
+#[derive(Component)]
+struct Canvas;
+
+/// Camera that renders the pixel-perfect world to the [`Canvas`].
+#[derive(Component)]
+struct OuterCamera;
+
+const RES_WIDTH: u32 = 200;
+const RES_HEIGHT: u32 = 113;
+
 /// A system to spawn the example level
 pub fn spawn(
     mut commands: Commands,
@@ -120,14 +133,60 @@ pub fn spawn(
     mut state: ResMut<RainState>,
     time: Res<Time>,
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
+    mut images: ResMut<Assets<Image>>,
 ) {
     state.reset(time.elapsed());
 
+    let canvas_size = Extent3d {
+        width: RES_WIDTH,
+        height: RES_HEIGHT,
+        ..default()
+    };
+
+    // This Image serves as a canvas representing the low-resolution game screen
+    let mut canvas = Image {
+        texture_descriptor: TextureDescriptor {
+            label: None,
+            size: canvas_size,
+            dimension: TextureDimension::D2,
+            format: TextureFormat::Bgra8UnormSrgb,
+            mip_level_count: 1,
+            sample_count: 1,
+            usage: TextureUsages::TEXTURE_BINDING
+                | TextureUsages::COPY_DST
+                | TextureUsages::RENDER_ATTACHMENT,
+            view_formats: &[],
+        },
+        sampler: ImageSampler::nearest(),
+        ..default()
+    };
+
+    // Fill image.data with zeroes
+    canvas.resize(canvas_size);
+
+    let image_handle = images.add(canvas);
+
+    // Render RENDERLAYER_GAME to the RT
     commands.spawn((
-        DespawnOnExit(GAME),             // When exiting this game despawn this entity
-        DespawnOnExit(Screen::Gameplay), // When exiting the top level game despawn this entity
+        DespawnOnExit(GAME),
+        DespawnOnExit(Screen::Gameplay),
         Camera2d,
         CameraShakeConfig::default(),
+        Camera {
+            order: -2,
+            clear_color: ClearColorConfig::None,
+            ..default()
+        },
+        RenderTarget::Image(image_handle.clone().into()),
+        Msaa::Off,
+        camera::RENDERLAYER_GAME,
+    ));
+
+    // Outer camera to render the RT
+    commands.spawn((
+        DespawnOnExit(GAME),
+        DespawnOnExit(Screen::Gameplay),
+        Camera2d,
         Camera {
             order: -1,
             clear_color: ClearColorConfig::None,
@@ -135,11 +194,21 @@ pub fn spawn(
         },
         Projection::from(OrthographicProjection {
             scaling_mode: ScalingMode::FixedVertical {
-                viewport_height: 113.0,
+                viewport_height: RES_HEIGHT as f32,
             },
             ..OrthographicProjection::default_2d()
         }),
-        camera::RENDERLAYER_GAME,
+        OuterCamera,
+        camera::RENDERLAYER_OUTER,
+    ));
+
+    // Spawn the canvas
+    commands.spawn((
+        DespawnOnExit(GAME),
+        DespawnOnExit(Screen::Gameplay),
+        Sprite::from_image(image_handle),
+        Canvas,
+        camera::RENDERLAYER_OUTER,
     ));
 
     let layout = TextureAtlasLayout::from_grid(UVec2 { x: 200, y: 120 }, 2, 2, None, None);
@@ -158,9 +227,7 @@ pub fn spawn(
             ),
             AnimationIndices { first: 0, last: 3 },
             AnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)),
-            children![
-                umbrella::umbrella(&assets),
-            ],
+            children![umbrella::umbrella(&assets), duck::duck(&assets)],
         ))
         .id();
 
