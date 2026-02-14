@@ -107,11 +107,11 @@ impl FromWorld for RainAssets {
                 },
             ),
             steps: vec![
-                assets.load("games/rain/steps1.ogg"),
-                assets.load("games/rain/steps2.ogg"),
-                assets.load("games/rain/steps3.ogg"),
-                assets.load("games/rain/steps4.ogg"),
-                assets.load("games/rain/steps5.ogg"),
+                assets.load("games/rain/steps-001.ogg"),
+                assets.load("games/rain/steps-002.ogg"),
+                assets.load("games/rain/steps-003.ogg"),
+                assets.load("games/rain/steps-004.ogg"),
+                assets.load("games/rain/steps-005.ogg"),
             ],
             umbrella: assets.load_with_settings(
                 "games/rain/umbrella.png",
