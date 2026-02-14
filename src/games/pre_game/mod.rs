@@ -4,6 +4,7 @@ use bevy::prelude::*;
 
 use crate::{
     asset_tracking::LoadResource,
+    backgrounds::BackgroundAssets,
     games::{
         Game, GameData, GameInfo, GameResult, GameState,
         pre_game::control_method::{ControlMethodAssets, control_method},
@@ -18,12 +19,13 @@ use crate::{
 mod balance;
 mod control_method;
 mod hint;
+mod thermometer;
 
 const GAME: Game = Game::Pre;
 
 pub(super) fn plugin(app: &mut App) {
     app.load_resource::<PreGameAssets>();
-    app.add_plugins((hint::plugin, control_method::plugin));
+    app.add_plugins((hint::plugin, control_method::plugin, thermometer::plugin));
     app.add_systems(OnEnter(GAME), spawn);
     app.init_resource::<PreGameState>();
 }
@@ -43,14 +45,11 @@ impl PreGameState {
         self.info = info;
     }
 }
+
 /// Used to track all assets for this game
 #[derive(Resource, Asset, Clone, Reflect)]
 #[reflect(Resource)]
 pub struct PreGameAssets {
-    #[dependency]
-    background1: Handle<Image>,
-    #[dependency]
-    background2: Handle<Image>,
     #[dependency]
     pass_background: Handle<Image>,
     #[dependency]
@@ -62,26 +61,28 @@ impl FromWorld for PreGameAssets {
     fn from_world(world: &mut World) -> Self {
         let assets = world.resource::<AssetServer>();
         Self {
-            background1: assets.load("games/pre_game/background1.jpeg"),
-            background2: assets.load("games/pre_game/background2.jpeg"),
             pass_background: assets.load("games/pre_game/pass.jpeg"),
             fail_background: assets.load("games/pre_game/fail.jpeg"),
         }
     }
 }
 
-fn image_from_result(result: Option<GameResult>, assets: &Res<PreGameAssets>) -> Handle<Image> {
+fn image_from_result(
+    result: Option<GameResult>,
+    pre_game_assets: &Res<PreGameAssets>,
+    background_assets: &Res<BackgroundAssets>,
+) -> Handle<Image> {
     if let Some(result) = result {
         match result {
-            GameResult::Passsed => assets.pass_background.clone(),
-            GameResult::Failed => assets.fail_background.clone(),
+            GameResult::Passsed => pre_game_assets.pass_background.clone(),
+            GameResult::Failed => pre_game_assets.fail_background.clone(),
         }
     } else {
-        assets.background1.clone()
+        background_assets.background1.clone()
     }
 }
 
-fn background(result: Option<GameResult>, assets: &Res<PreGameAssets>) -> Handle<Image> {
+fn background(result: Option<GameResult>, assets: &Res<BackgroundAssets>) -> Handle<Image> {
     if let Some(result) = result {
         match result {
             GameResult::Passsed => assets.background1.clone(),
@@ -100,10 +101,17 @@ pub fn spawn(
     game_state: Res<State<GameState>>,
     control_assets: Res<ControlMethodAssets>,
     game_assets: Res<PreGameAssets>,
+    background_assets: Res<BackgroundAssets>,
     data: Res<GameData>,
 ) {
     if let GameState::PreGame(info) = game_state.get() {
         state.reset(time.elapsed(), info.next);
+
+        info!(
+            "Fever grade: {} ({})",
+            data.fever_grade(),
+            data.fever_grade_nominal()
+        );
 
         commands
             .spawn((
@@ -115,10 +123,14 @@ pub fn spawn(
                     layout::grid_parent(),
                     children![
                         (
-                            ImageNode::new(image_from_result(info.last, &game_assets)),
+                            ImageNode::new(image_from_result(
+                                info.last,
+                                &game_assets,
+                                &background_assets
+                            )),
                             TimedImageChange {
                                 transition_time: time.elapsed() + Duration::from_millis(500),
-                                next: background(info.last, &game_assets),
+                                next: background(info.last, &background_assets),
                             },
                             ZIndex(-1),
                         ),

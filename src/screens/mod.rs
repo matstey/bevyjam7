@@ -2,10 +2,13 @@
 
 mod gameplay;
 mod loading;
+mod post_game;
 mod splash;
 mod title;
 
 use bevy::prelude::*;
+
+use crate::asset_tracking::ResourceHandles;
 
 pub(super) fn plugin(app: &mut App) {
     app.init_state::<Screen>();
@@ -15,6 +18,7 @@ pub(super) fn plugin(app: &mut App) {
         loading::plugin,
         splash::plugin,
         title::plugin,
+        post_game::plugin,
     ));
 }
 
@@ -26,4 +30,17 @@ pub enum Screen {
     Title,
     Loading,
     Gameplay,
+    PostGame,
+}
+
+pub fn enter_loading_or_gameplay_screen(
+    _: On<Pointer<Click>>,
+    resource_handles: Res<ResourceHandles>,
+    mut next_screen: ResMut<NextState<Screen>>,
+) {
+    if resource_handles.is_all_done() {
+        next_screen.set(Screen::Gameplay);
+    } else {
+        next_screen.set(Screen::Loading);
+    }
 }

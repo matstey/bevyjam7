@@ -35,7 +35,7 @@ fn update(
             // Use the sign of the last target to make sure we always rotate the other way
             floats_data.target = rng.random_range(0.0..2.0) * -floats_data.target.signum();
             floats_data.move_start_time = time.elapsed();
-            let speed = rng.random_range(2.0..3.0) * data.fever_grade(); // deg/s
+            let speed = rng.random_range(2.0..3.0) * data.fever_grade().max(1.0); // deg/s
             floats_data.move_duration =
                 Duration::from_secs_f32(floats_data.move_distance() / speed);
         } else {

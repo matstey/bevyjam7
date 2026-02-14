@@ -6,6 +6,7 @@
 mod animation;
 mod asset_tracking;
 mod audio;
+mod backgrounds;
 mod controls;
 #[cfg(feature = "dev")]
 mod dev_tools;
@@ -68,6 +69,7 @@ impl Plugin for AppPlugin {
         );
 
         // Add other plugins.
+        // Cant add anymore here
         app.add_plugins((
             asset_tracking::plugin,
             audio::plugin,
@@ -86,6 +88,8 @@ impl Plugin for AppPlugin {
             transition::plugin,
             controls::plugin,
         ));
+
+        app.add_plugins(backgrounds::plugin);
 
         // Order new `AppSystems` variants by adding them here:
         app.configure_sets(

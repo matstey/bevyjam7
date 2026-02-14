@@ -39,7 +39,7 @@ fn update(
                 rng.random_range(1.0..5.0) * random::sign(&mut rng),
             );
             floats_data.move_start_time = time.elapsed();
-            let speed = rng.random_range(1.0..5.0) * data.fever_grade();
+            let speed = rng.random_range(1.0..5.0) * data.fever_grade().max(1.0);
             floats_data.move_duration =
                 Duration::from_secs_f32(floats_data.move_distance() / speed);
         } else {

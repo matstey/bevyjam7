@@ -34,7 +34,7 @@ fn update(
             floats_data.move_start_time = time.elapsed();
             let speed = rng.random_range(2.0..3.0) * data.fever_grade(); // deg/s
             floats_data.move_duration =
-                Duration::from_secs_f32(floats_data.move_distance() / speed);
+                Duration::from_secs_f32(floats_data.move_distance() / speed.max(1.0));
         } else {
             transform.rotation = floats_data.start * floats_data.slerp(time.elapsed());
         }

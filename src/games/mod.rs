@@ -1,11 +1,8 @@
 use std::{fmt, time::Duration};
 
-use bevy::{color::palettes::css, prelude::*};
+use bevy::prelude::*;
 
-use crate::{
-    asset_tracking::LoadResource, controls::progress_bar::ProgressBar, float::Floats,
-    screens::Screen, theme::widget,
-};
+use crate::screens::Screen;
 
 mod balance;
 mod camera;
@@ -19,15 +16,12 @@ mod pre_game;
 mod rain;
 
 pub(super) fn plugin(app: &mut App) {
-    app.load_resource::<GameAssets>();
     app.init_state::<Game>();
     app.init_state::<GameState>();
     app.init_resource::<GameData>();
     app.add_message::<NextGame>();
     // Has to be in post update to make sure any request for the next level are processed before the next loop starts
     app.add_systems(PostUpdate, spawn_next);
-    app.add_systems(OnEnter(Screen::Gameplay), spawn_health);
-    app.add_systems(Update, update_health_bar);
 
     // Register all mini games here
     app.add_plugins((
@@ -164,11 +158,25 @@ impl GameData {
     }
 
     fn adjust_health(&mut self, adjustment: f32) {
-        self.health = (self.health + adjustment).clamp(0.0, balance::MAX_HEALTH);
+        self.health = (self.health + adjustment).clamp(0.0, balance::MAX_FEVER);
     }
 
     pub fn fever_grade(&self) -> f32 {
-        (self.failed as f32 / self.passed.max(1) as f32) + 1.0 // Range has to start at 1.0
+        // 0.0 -> MAX_FEVER
+        (if self.passed == 0 {
+            self.failed as f32
+        } else {
+            self.failed as f32 / self.passed as f32
+        })
+        .clamp(0.0, balance::MAX_FEVER)
+    }
+
+    pub fn fever_grade_nominal(&self) -> f32 {
+        self.fever_grade() / balance::MAX_FEVER
+    }
+
+    pub fn dead(&self) -> bool {
+        self.fever_grade() >= balance::MAX_FEVER
     }
 }
 
@@ -202,73 +210,6 @@ impl fmt::Display for GameResult {
     }
 }
 
-#[derive(Resource, Asset, Clone, Reflect)]
-#[reflect(Resource)]
-pub struct GameAssets {
-    #[dependency]
-    thermometer: Handle<Image>,
-    #[dependency]
-    thermometer_background: Handle<Image>,
-}
-
-impl FromWorld for GameAssets {
-    /// Load all assets we want for this game
-    fn from_world(world: &mut World) -> Self {
-        let assets = world.resource::<AssetServer>();
-        Self {
-            thermometer: assets.load("thermometer.png"),
-            thermometer_background: assets.load("thermometer_background.png"),
-        }
-    }
-}
-
-#[derive(Debug, Component)]
-pub struct HealthBar;
-
-fn spawn_health(mut commands: Commands, assets: Res<GameAssets>) {
-    commands.spawn((
-        widget::ui_root("heath"),
-        ZIndex(3),
-        DespawnOnExit(Screen::Gameplay),
-        Floats,
-        children![
-            (
-                Node {
-                    right: px(0),
-                    position_type: PositionType::Absolute,
-                    width: px(120.5),
-                    height: px(299.5),
-                    ..default()
-                },
-                ImageNode::new(assets.thermometer_background.clone()),
-                Pickable::IGNORE,
-            ),
-            (
-                Node {
-                    right: px(0),
-                    position_type: PositionType::Absolute,
-                    width: px(120.5),
-                    height: px(299.5),
-                    ..default()
-                },
-                HealthBar,
-                ProgressBar {
-                    color: css::RED.into(),
-                    color_texture: assets.thermometer.clone(),
-                    ..default()
-                },
-                Pickable::IGNORE,
-            )
-        ],
-    ));
-}
-
-fn update_health_bar(mut query: Query<&mut ProgressBar, With<HealthBar>>, data: Res<GameData>) {
-    for mut progress_bar in query.iter_mut() {
-        progress_bar.progress = 0.35 + (data.fever_grade() / 10.0); // TODO: Decide how his logic should be. When do u die?
-    }
-}
-
 /// A system that triggers the first game to spawn
 pub fn spawn_first(
     mut next_game: ResMut<NextState<Game>>,
@@ -289,6 +230,7 @@ fn spawn_next(
     mut game_data: ResMut<GameData>,
     mut next_game: ResMut<NextState<Game>>,
     mut next_game_state: ResMut<NextState<GameState>>,
+    mut next_screen: ResMut<NextState<Screen>>,
 ) {
     let current = *game.get(); // Store the current game so we only every transition once but still process all messages
     for game in rx.read() {
@@ -304,17 +246,23 @@ fn spawn_next(
             Game::Pre => todo!(), // If this get hit something has gone wrong
         };
 
-        next_game.set(Game::Pre);
         game_data.apply_result(game.result, Duration::from_secs(5)); // TODO: Actually time passed between games?
-        next_game_state.set(GameState::PreGame(GameTransitionInfo {
-            next: get_info(next_game_kind),
-            last: Some(game.result),
-        }));
 
-        info!(
-            "Last game result {}. Next game {}.",
-            game.result, next_game_kind
-        );
+        if game_data.dead() {
+            next_screen.set(Screen::PostGame);
+            info!("Game over");
+        } else {
+            next_game.set(Game::Pre);
+            next_game_state.set(GameState::PreGame(GameTransitionInfo {
+                next: get_info(next_game_kind),
+                last: Some(game.result),
+            }));
+
+            info!(
+                "Last game result {}. Next game {}.",
+                game.result, next_game_kind
+            );
+        }
     }
 }
 
