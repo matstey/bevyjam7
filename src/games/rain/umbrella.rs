@@ -1,7 +1,7 @@
 use bevy::{prelude::*, sprite::Anchor};
 use rand::Rng;
 
-use crate::games::{camera::shake::CameraShakeState, rain::RainAssets};
+use crate::games::rain::RainAssets;
 
 #[derive(Debug, Default, Component)]
 pub struct RandomMover {
@@ -37,7 +37,8 @@ pub fn update(time: Res<Time>, mut query: Query<(&mut RandomMover, &mut Transfor
     for (mut mover, mut transform) in &mut query {
         if time.elapsed_secs() > mover.end_time {
             mover.end_time = time.elapsed_secs() + rng.random_range(0.5..1.5);
-            mover.velocity = rng.random_range(15.0..30.0) * f32::signum(rng.random_range(-1.0..1.0));
+            mover.velocity =
+                rng.random_range(15.0..30.0) * f32::signum(rng.random_range(-1.0..1.0));
         }
 
         let new_x = transform.translation.x + (mover.velocity * time.delta_secs());

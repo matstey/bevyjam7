@@ -9,7 +9,6 @@ use bevy::{
     render::render_resource::{
         Extent3d, TextureDescriptor, TextureDimension, TextureFormat, TextureUsages,
     },
-    window::WindowResized,
 };
 
 use crate::{
@@ -27,8 +26,8 @@ use crate::{
 use crate::animation::{AnimationIndices, AnimationTimer};
 
 mod balance;
-mod umbrella;
 mod duck;
+mod umbrella;
 
 const GAME: Game = Game::Rain;
 
@@ -272,7 +271,7 @@ pub fn spawn(
         .observe(timed_out);
 }
 
-fn timed_out(_event: On<TimedOut>, mut tx: MessageWriter<NextGame>, state: Res<RainState>) {
+fn timed_out(_event: On<TimedOut>, mut tx: MessageWriter<NextGame>, _state: Res<RainState>) {
     tx.write(NextGame::from_result(GameResult::Failed));
     info!("failed - next game");
 }

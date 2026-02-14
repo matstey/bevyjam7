@@ -1,8 +1,7 @@
-use bevy::prelude::*;
 use crate::movement::TopDownMovementController;
-use rand::Rng;
+use bevy::prelude::*;
 
-use crate::games::{camera::shake::CameraShakeState, rain::RainAssets};
+use crate::games::rain::RainAssets;
 
 pub fn duck(assets: &RainAssets) -> impl Bundle {
     let max_speed = 42.0;
@@ -16,8 +15,4 @@ pub fn duck(assets: &RainAssets) -> impl Bundle {
             ..default()
         },
     )
-}
-
-pub fn update(time: Res<Time>, mut query: Query<(&mut Transform)>) {
-
 }
