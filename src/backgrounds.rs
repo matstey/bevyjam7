@@ -29,3 +29,16 @@ impl FromWorld for BackgroundAssets {
         }
     }
 }
+
+impl BackgroundAssets {
+    pub const COUNT: usize = 3;
+
+    pub fn from_index(&self, index: usize) -> Handle<Image> {
+        match index % Self::COUNT {
+            0 => self.background1.clone(),
+            1 => self.background2.clone(),
+            2 => self.background3.clone(),
+            _ => self.background1.clone(),
+        }
+    }
+}

@@ -60,7 +60,6 @@ pub fn label(text: impl Into<String>) -> impl Bundle {
         Text(text.into()),
         TextFont::from_font_size(24.0),
         TextColor(LABEL_TEXT),
-        TextShadow::default(),
         Floats,
     )
 }
