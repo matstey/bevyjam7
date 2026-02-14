@@ -29,6 +29,7 @@ pub fn oyster(
     assets: &LobsterAssets,
     pos: Vec2,
     texture_atlas_layouts: &mut Assets<TextureAtlasLayout>,
+    open_time: f32,
 ) -> impl Bundle {
     // use bevy random source?
     let mut rng = rand::rng();
@@ -37,8 +38,7 @@ pub fn oyster(
     let layout = TextureAtlasLayout::from_grid(UVec2 { x: 220, y: 253 }, 3, 1, None, None);
     let texture_atlas_layout = texture_atlas_layouts.add(layout);
 
-    // Can I make one that starts paused?
-    let mut close_timer = Timer::from_seconds(balance::OPEN_TIME, TimerMode::Once);
+    let mut close_timer = Timer::from_seconds(open_time, TimerMode::Once);
     close_timer.pause();
 
     (

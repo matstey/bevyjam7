@@ -13,7 +13,7 @@ use crate::{
     AppSystems, PausableSystems,
     asset_tracking::LoadResource,
     games::{
-        Game, GameControlMethod, GameInfo, GameResult, NextGame,
+        Game, GameControlMethod, GameInfo, GameResult, NextGame, GameData,
         camera::{self, shake::CameraShakeConfig},
     },
     screens::Screen,
@@ -144,6 +144,7 @@ impl FromWorld for LobsterAssets {
 /// A system to spawn the example level
 pub fn spawn(
     mut commands: Commands,
+    gamedata: Res<GameData>,
     assets: Res<LobsterAssets>,
     mut state: ResMut<LobsterState>,
     time: Res<Time>,
@@ -196,11 +197,14 @@ pub fn spawn(
         ));
     }
 
+    let level_multiplier = f32::powi(balance::LEVEL_MULTIPLIER, gamedata.level as i32);
+    let open_time = balance::OPEN_TIME * level_multiplier;
     let oyster = commands
         .spawn(oyster::oyster(
             &assets,
             Vec2 { x: 240.0, y: -90.0 },
             &mut texture_atlas_layouts,
+            open_time
         ))
         .id();
 
