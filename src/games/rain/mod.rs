@@ -86,6 +86,8 @@ pub struct RainAssets {
     #[dependency]
     pub duck: Handle<Image>,
     #[dependency]
+    pub duck_wet: Handle<Image>,
+    #[dependency]
     pub steps: Vec<Handle<AudioSource>>,
     #[dependency]
     pub umbrella: Handle<Image>,
@@ -102,6 +104,12 @@ impl FromWorld for RainAssets {
         Self {
             duck: assets.load_with_settings(
                 "games/rain/duck_anim.png",
+                |settings: &mut ImageLoaderSettings| {
+                    settings.sampler = ImageSampler::nearest();
+                },
+            ),
+            duck_wet: assets.load_with_settings(
+                "games/rain/duck_wet_anim.png",
                 |settings: &mut ImageLoaderSettings| {
                     settings.sampler = ImageSampler::nearest();
                 },
@@ -305,14 +313,23 @@ fn timed_out(_event: On<TimedOut>, mut tx: MessageWriter<NextGame>, state: Res<R
 
 fn update(
     time: Res<Time>,
+    assets: Res<RainAssets>,
     mut state: ResMut<RainState>,
-    player: Single<&Transform, With<TopDownMovementController>>,
+    player: Single<(&Transform, &mut Sprite), With<TopDownMovementController>>,
     umbrella: Single<&Transform, With<Umbrella>>,
 ) {
-    let umbrella_dist = f32::abs(player.translation.x - umbrella.translation.x);
+    let (player_transform, mut sprite) = player.into_inner();
+
+    let umbrella_dist = f32::abs(player_transform.translation.x - umbrella.translation.x);
     let sheltered = umbrella_dist < balance::SHELTER_THRESHOLD;
+
+    let prev_wet = state.wetness < 1.0;
 
     if !sheltered {
         state.wetness += time.delta_secs() * balance::MAX_WET_TIME;
+
+        if !prev_wet && state.wetness > 1.0 {
+            sprite.image = assets.duck_wet.clone();
+        }
     }
 }
