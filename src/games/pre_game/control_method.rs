@@ -32,14 +32,10 @@ impl FromWorld for ControlMethodAssets {
     }
 }
 
-pub fn control_method(
-    method: GameControlMethod,
-    assets: &ControlMethodAssets,
-    color: Color,
-) -> impl Bundle {
+pub fn control_method(method: GameControlMethod, assets: &ControlMethodAssets) -> impl Bundle {
     (
         Name::new("control_method"),
-        ImageNode::new(asset_from_method(method, assets)).with_color(color),
+        ImageNode::new(asset_from_method(method, assets)),
         Floats,
     )
 }

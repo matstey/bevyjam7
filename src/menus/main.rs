@@ -4,7 +4,7 @@ use bevy::prelude::*;
 
 use crate::{
     app,
-    menus::Menu,
+    menus::{Menu, MenuAssets},
     screens::{self},
     theme::widget,
 };
@@ -13,7 +13,7 @@ pub(super) fn plugin(app: &mut App) {
     app.add_systems(OnEnter(Menu::Main), spawn_main_menu);
 }
 
-fn spawn_main_menu(mut commands: Commands) {
+fn spawn_main_menu(mut commands: Commands, assets: Res<MenuAssets>) {
     commands.spawn((
         widget::ui_root("Main Menu"),
         GlobalZIndex(2),
@@ -21,15 +21,23 @@ fn spawn_main_menu(mut commands: Commands) {
         #[cfg(not(target_family = "wasm"))]
         children![
             widget::header(app::NAME),
-            widget::button("Play", screens::enter_loading_or_gameplay_screen),
-            widget::button("Settings", open_settings_menu),
-            widget::button("Exit", exit_app),
+            widget::image_button(
+                "Play",
+                screens::enter_loading_or_gameplay_screen,
+                assets.button.clone()
+            ),
+            widget::image_button("Settings", open_settings_menu, assets.button.clone()),
+            widget::image_button("Exit", exit_app, assets.button.clone()),
         ],
         #[cfg(target_family = "wasm")]
         children![
             widget::header(app::NAME),
-            widget::button("Play", screens::enter_loading_or_gameplay_screen),
-            widget::button("Settings", open_settings_menu),
+            widget::image_button(
+                "Play",
+                screens::enter_loading_or_gameplay_screen,
+                assets.button.clone()
+            ),
+            widget::image_button("Settings", open_settings_menu, assets.button.clone()),
         ],
     ));
 }

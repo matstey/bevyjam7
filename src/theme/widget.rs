@@ -64,6 +64,60 @@ pub fn label(text: impl Into<String>) -> impl Bundle {
     )
 }
 
+pub fn image_button<E, B, M, I>(
+    text: impl Into<String>,
+    action: I,
+    image: Handle<Image>,
+) -> impl Bundle
+where
+    E: EntityEvent,
+    B: Bundle,
+    I: IntoObserverSystem<E, B, M>,
+{
+    let text = text.into();
+    let action = IntoObserverSystem::into_system(action);
+    (
+        Name::new("Button"),
+        Node {
+            width: px(260),
+            height: px(116),
+            align_items: AlignItems::Center,
+            justify_content: JustifyContent::Center,
+            ..default()
+        },
+        Floats,
+        Children::spawn(SpawnWith(|parent: &mut ChildSpawner| {
+            parent
+                .spawn((
+                    Name::new("Button Inner"),
+                    Node {
+                        width: px(260),
+                        height: px(116),
+                        align_items: AlignItems::Center,
+                        justify_content: JustifyContent::Center,
+                        ..default()
+                    },
+                    Button,
+                    ImageNode::new(image).with_color(BUTTON_BACKGROUND),
+                    InteractionPalette {
+                        none: BUTTON_BACKGROUND,
+                        hovered: BUTTON_HOVERED_BACKGROUND,
+                        pressed: BUTTON_PRESSED_BACKGROUND,
+                    },
+                    children![(
+                        Name::new("Button Text"),
+                        Text(text),
+                        TextFont::from_font_size(24.0),
+                        TextColor(BUTTON_TEXT),
+                        // Don't bubble picking events from the text up to the button.
+                        Pickable::IGNORE,
+                    )],
+                ))
+                .observe(action);
+        })),
+    )
+}
+
 /// A large rounded button with text and an action defined as an [`Observer`].
 pub fn button<E, B, M, I>(text: impl Into<String>, action: I) -> impl Bundle
 where

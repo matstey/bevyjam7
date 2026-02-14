@@ -5,7 +5,6 @@ use bevy::prelude::*;
 use crate::{
     asset_tracking::LoadResource,
     backgrounds::BackgroundAssets,
-    color::color_u32,
     games::{
         Game, GameData, GameInfo, GameResult, GameState,
         pre_game::control_method::{ControlMethodAssets, control_method},
@@ -15,6 +14,7 @@ use crate::{
     theme::widget,
     timeout::{TimedOut, Timeout},
     transition::TimedImageChange,
+    visibility::ShowAt,
 };
 
 mod balance;
@@ -122,16 +122,16 @@ pub fn spawn(
                             )),
                             TimedImageChange {
                                 transition_time: time.elapsed() + Duration::from_millis(500),
-                                next: background_assets.from_index(data.round + data.random),
+                                next: background_assets.index(data.round + data.random),
                             },
                             ZIndex(-1),
                         ),
                         (
                             layout::center(),
-                            children![control_method(
-                                info.next.controls,
-                                &control_assets,
-                                color_u32(info.next.color)
+                            children![(
+                                control_method(info.next.controls, &control_assets),
+                                Visibility::Hidden,
+                                ShowAt::from_duration(time.elapsed() + Duration::from_millis(500))
                             )],
                         ),
                         (
