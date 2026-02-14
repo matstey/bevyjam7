@@ -33,7 +33,7 @@ const GAME: Game = Game::Rain;
 
 pub(super) fn plugin(app: &mut App) {
     app.load_resource::<RainAssets>();
-    app.add_systems(OnEnter(GAME), spawn);
+    app.add_systems(OnEnter(GAME), (spawn, spawn_camera));
     app.add_systems(
         Update,
         (update, umbrella::update)
@@ -113,29 +113,16 @@ impl FromWorld for RainAssets {
     }
 }
 
-/// Low-resolution texture that contains the pixel-perfect world.
-/// Canvas itself is rendered to the high-resolution world.
 #[derive(Component)]
 struct Canvas;
 
-/// Camera that renders the pixel-perfect world to the [`Canvas`].
 #[derive(Component)]
 struct OuterCamera;
 
 const RES_WIDTH: u32 = 200;
 const RES_HEIGHT: u32 = 113;
 
-/// A system to spawn the example level
-pub fn spawn(
-    mut commands: Commands,
-    assets: Res<RainAssets>,
-    mut state: ResMut<RainState>,
-    time: Res<Time>,
-    mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
-    mut images: ResMut<Assets<Image>>,
-) {
-    state.reset(time.elapsed());
-
+pub fn spawn_camera(mut commands: Commands, mut images: ResMut<Assets<Image>>) {
     let canvas_size = Extent3d {
         width: RES_WIDTH,
         height: RES_HEIGHT,
@@ -209,6 +196,16 @@ pub fn spawn(
         Canvas,
         camera::RENDERLAYER_OUTER,
     ));
+}
+
+pub fn spawn(
+    mut commands: Commands,
+    assets: Res<RainAssets>,
+    mut state: ResMut<RainState>,
+    time: Res<Time>,
+    mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
+) {
+    state.reset(time.elapsed());
 
     let layout = TextureAtlasLayout::from_grid(UVec2 { x: 200, y: 120 }, 2, 2, None, None);
     let texture_atlas_layout = texture_atlas_layouts.add(layout);

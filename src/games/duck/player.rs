@@ -39,7 +39,7 @@ pub fn player(
         ),
         Transform::from_scale(Vec2::splat(8.0).extend(1.0)),
         TopDownMovementController {
-            max_speed,
+            max_speed: Vec2::splat(max_speed),
             ..default()
         },
         ScreenWrap,

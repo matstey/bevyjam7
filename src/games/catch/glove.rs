@@ -30,7 +30,7 @@ pub fn glove(
         Sprite::from_image(assets.glove.clone()),
         Transform::from_scale(Vec2::splat(0.5).extend(1.0)), // TODO: Random start position??
         TopDownMovementController {
-            max_speed,
+            max_speed: Vec2::splat(max_speed),
             ..default()
         },
         ScreenWrap,

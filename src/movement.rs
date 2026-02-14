@@ -43,7 +43,7 @@ pub struct TopDownMovementController {
 
     /// Maximum speed in world units per second.
     /// 1 world unit = 1 pixel when using the default 2D camera and no physics engine.
-    pub max_speed: f32,
+    pub max_speed: Vec2,
 }
 
 impl Default for TopDownMovementController {
@@ -51,7 +51,7 @@ impl Default for TopDownMovementController {
         Self {
             intent: Vec2::ZERO,
             // 400 pixels per second is a nice default, but we can still vary this per character.
-            max_speed: 400.0,
+            max_speed: Vec2 { x: 400.0, y: 400.0 },
         }
     }
 }
