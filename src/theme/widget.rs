@@ -37,6 +37,7 @@ pub fn header(text: impl Into<String>) -> impl Bundle {
         Text(text.into()),
         TextFont::from_font_size(100.0),
         TextColor(HEADER_TEXT),
+        TextShadow::default(),
         Floats,
     )
 }
@@ -47,6 +48,7 @@ pub fn header_with_color(text: impl Into<String>, color: Color) -> impl Bundle {
         Text(text.into()),
         TextFont::from_font_size(100.0),
         TextColor(color),
+        TextShadow::default(),
         Floats,
     )
 }
@@ -58,6 +60,7 @@ pub fn label(text: impl Into<String>) -> impl Bundle {
         Text(text.into()),
         TextFont::from_font_size(24.0),
         TextColor(LABEL_TEXT),
+        TextShadow::default(),
         Floats,
     )
 }

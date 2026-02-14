@@ -73,6 +73,7 @@ fn spawn(mut commands: Commands, assets: Res<ThermometerAssets>) {
                 ProgressBar {
                     color: css::RED.into(),
                     color_texture: assets.foreground.clone(),
+                    vertical: true,
                     ..default()
                 },
                 Pickable::IGNORE,
@@ -82,8 +83,9 @@ fn spawn(mut commands: Commands, assets: Res<ThermometerAssets>) {
 }
 
 fn update(mut query: Query<&mut ProgressBar, With<Thermometer>>, data: Res<GameData>) {
-    //const MIN_THERMOMETER: f32 = 0.3;
+    const MIN_THERMOMETER: f32 = 0.34;
     for mut progress_bar in query.iter_mut() {
-        progress_bar.progress = data.fever_grade_nominal();
+        progress_bar.progress =
+            MIN_THERMOMETER + (data.fever_grade_nominal() * (1.0 - MIN_THERMOMETER));
     }
 }

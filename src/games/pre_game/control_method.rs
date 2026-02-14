@@ -1,4 +1,4 @@
-use crate::{asset_tracking::LoadResource, float::Floats, games::GameControlMethod, theme};
+use crate::{asset_tracking::LoadResource, float::Floats, games::GameControlMethod};
 use bevy::prelude::*;
 
 pub(super) fn plugin(app: &mut App) {
@@ -32,10 +32,14 @@ impl FromWorld for ControlMethodAssets {
     }
 }
 
-pub fn control_method(method: GameControlMethod, assets: &ControlMethodAssets) -> impl Bundle {
+pub fn control_method(
+    method: GameControlMethod,
+    assets: &ControlMethodAssets,
+    color: Color,
+) -> impl Bundle {
     (
         Name::new("control_method"),
-        ImageNode::new(asset_from_method(method, assets)).with_color(theme::palette::NEON_GREEN),
+        ImageNode::new(asset_from_method(method, assets)).with_color(color),
         Floats,
     )
 }

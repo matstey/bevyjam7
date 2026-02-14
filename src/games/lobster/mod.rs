@@ -9,7 +9,6 @@ use bevy::{
     prelude::*,
 };
 
-use crate::float::Floats;
 use crate::{
     AppSystems, PausableSystems,
     asset_tracking::LoadResource,
@@ -19,8 +18,9 @@ use crate::{
     },
     screens::Screen,
     theme::widget,
-    timeout::{TimedOut, Timeout, TimeoutLabel},
+    timeout::{TimedOut, Timeout, TimeoutBar},
 };
+use crate::{color::color_u32, float::Floats};
 
 mod balance;
 mod lobster_char;
@@ -59,6 +59,7 @@ pub const fn get_info() -> GameInfo {
         kind: GAME,
         controls: GameControlMethod::Space,
         hint: "Grab",
+        color: 0x642327FF,
     }
 }
 
@@ -234,7 +235,9 @@ pub fn spawn(
             DespawnOnExit(GAME), // When exiting this game despawn this entity
             DespawnOnExit(Screen::Gameplay), // When exiting the top level game despawn this entity
             Timeout::new(balance::GAME_DURATION),
-            children![TimeoutLabel],
+            children![TimeoutBar::from_foreground_color(color_u32(
+                get_info().color
+            ))],
         ))
         .observe(timed_out);
 }

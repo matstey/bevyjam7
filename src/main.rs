@@ -4,9 +4,11 @@
 #![cfg_attr(not(feature = "dev"), windows_subsystem = "windows")]
 
 mod animation;
+mod app;
 mod asset_tracking;
 mod audio;
 mod backgrounds;
+mod color;
 mod controls;
 #[cfg(feature = "dev")]
 mod dev_tools;

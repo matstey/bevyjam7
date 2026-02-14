@@ -56,66 +56,6 @@ fn spawn(
     }
 }
 
-// fn setup(
-//     mut commands: Commands,
-//     mut ui_materials: ResMut<Assets<ProgressBarMaterial>>,
-//     asset_server: Res<AssetServer>,
-// ) {
-//     commands
-//         .spawn((
-//             Node {
-//                 width: percent(100),
-//                 height: percent(100),
-//                 align_items: AlignItems::Center,
-//                 justify_content: JustifyContent::Center,
-//                 ..default()
-//             },
-//             ZIndex(3),
-//         ))
-//         .with_children(|parent| {
-//             let banner_scale_factor = 0.5;
-//             parent.spawn((
-//                 Node {
-//                     position_type: PositionType::Absolute,
-//                     width: px(905.0 * banner_scale_factor),
-//                     height: px(363.0 * banner_scale_factor),
-//                     border: UiRect::all(px(20)),
-//                     border_radius: BorderRadius::all(px(20)),
-//                     ..default()
-//                 },
-//                 MaterialNode(ui_materials.add(ProgressBarMaterial {
-//                     color: LinearRgba::WHITE.to_f32_array().into(),
-//                     slider: Vec4::splat(0.5),
-//                     color_texture: asset_server.load("branding/banner.png"),
-//                     border_color: LinearRgba::WHITE.to_f32_array().into(),
-//                 })),
-//             ));
-//         });
-// }
-
-// Fills the slider slowly over 2 seconds and resets it
-// Also updates the color of the image to a rainbow color
-// fn animate(
-//     mut materials: ResMut<Assets<ProgressBarMaterial>>,
-//     q: Query<&MaterialNode<ProgressBarMaterial>>,
-//     time: Res<Time>,
-// ) {
-//     let duration = 2.0;
-//     for handle in &q {
-//         if let Some(material) = materials.get_mut(handle) {
-//             // rainbow color effect
-//             let new_color = Color::hsl((time.elapsed_secs() * 60.0) % 360.0, 1., 0.5);
-//             let border_color = Color::hsl((time.elapsed_secs() * 60.0) % 360.0, 0.75, 0.75);
-//             material.color = new_color.to_linear().to_vec4();
-//             material.slider.x =
-//                 ((time.elapsed_secs() % (duration * 2.0)) - duration).abs() / duration;
-//             material.slider.y =
-//                 ((time.elapsed_secs() % (duration * 2.0)) - duration).abs() / duration;
-//             material.border_color = border_color.to_linear().to_vec4();
-//         }
-//     }
-// }
-
 fn update(
     mut materials: ResMut<Assets<ProgressBarMaterial>>,
     query: Query<(&ProgressBar, &MaterialNode<ProgressBarMaterial>)>,
@@ -124,11 +64,11 @@ fn update(
         if let Some(material) = materials.get_mut(material) {
             material.color = progress_bar.color.to_linear().to_vec4();
             if progress_bar.vertical {
-                material.slider.x = progress_bar.progress;
-                material.slider.y = 1.0;
-            } else {
                 material.slider.x = 1.0;
                 material.slider.y = progress_bar.progress;
+            } else {
+                material.slider.x = progress_bar.progress;
+                material.slider.y = 1.0;
             }
             material.border_color = progress_bar.border_color.to_linear().to_vec4();
         }

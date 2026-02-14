@@ -85,6 +85,7 @@ pub struct GameInfo {
     pub kind: Game,
     pub controls: GameControlMethod,
     pub hint: &'static str,
+    pub color: u32,
 }
 
 #[derive(Debug, Default, Copy, Clone, Eq, PartialEq, Hash)]
