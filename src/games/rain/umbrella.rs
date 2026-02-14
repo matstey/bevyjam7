@@ -9,8 +9,12 @@ pub struct RandomMover {
     end_time: f32,
 }
 
+#[derive(Component)]
+pub struct Umbrella;
+
 pub fn umbrella(assets: &RainAssets) -> impl Bundle {
     (
+        Umbrella,
         Transform::from_xyz(0.0, -0.5, 10.0),
         Visibility::default(),
         Sprite::from_image(assets.umbrella.clone()),

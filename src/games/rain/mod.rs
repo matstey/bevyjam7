@@ -17,7 +17,9 @@ use crate::{
     games::{
         Game, GameControlMethod, GameInfo, GameResult, NextGame,
         camera::{self, shake::CameraShakeConfig},
+        rain::umbrella::Umbrella,
     },
+    movement::TopDownMovementController,
     screens::Screen,
     theme::widget,
     timeout::{TimedOut, Timeout, TimeoutLabel},
@@ -25,6 +27,7 @@ use crate::{
 
 use crate::animation::{AnimationIndices, AnimationTimer};
 
+mod animation;
 mod balance;
 mod duck;
 mod umbrella;
@@ -44,6 +47,7 @@ pub(super) fn plugin(app: &mut App) {
 
     // Register a basic data structure that we can use to track data for this game
     app.init_resource::<RainState>();
+    app.add_plugins(animation::plugin);
 }
 
 pub const fn get_info() -> GameInfo {
@@ -58,11 +62,13 @@ pub const fn get_info() -> GameInfo {
 #[derive(Debug, Default, Clone, Copy, Resource)]
 pub struct RainState {
     pub start_time: Duration,
+    pub wetness: f32,
 }
 
 impl RainState {
     pub fn reset(&mut self, start_time: Duration) {
         self.start_time = start_time;
+        self.wetness = 0.0;
     }
 }
 
@@ -86,7 +92,7 @@ impl FromWorld for RainAssets {
         let assets = world.resource::<AssetServer>();
         Self {
             duck: assets.load_with_settings(
-                "games/rain/duck.png",
+                "games/rain/duck_anim.png",
                 |settings: &mut ImageLoaderSettings| {
                     settings.sampler = ImageSampler::nearest();
                 },
@@ -223,7 +229,10 @@ pub fn spawn(
             ),
             AnimationIndices { first: 0, last: 3 },
             AnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)),
-            children![umbrella::umbrella(&assets), duck::duck(&assets)],
+            children![
+                umbrella::umbrella(&assets),
+                duck::duck(&assets, &mut texture_atlas_layouts)
+            ],
         ))
         .id();
 
@@ -268,9 +277,26 @@ pub fn spawn(
         .observe(timed_out);
 }
 
-fn timed_out(_event: On<TimedOut>, mut tx: MessageWriter<NextGame>, _state: Res<RainState>) {
-    tx.write(NextGame::from_result(GameResult::Failed));
-    info!("failed - next game");
+fn timed_out(_event: On<TimedOut>, mut tx: MessageWriter<NextGame>, state: Res<RainState>) {
+    if state.wetness < 1.0 {
+        tx.write(NextGame::from_result(GameResult::Passsed));
+        info!("success - next game");
+    } else {
+        tx.write(NextGame::from_result(GameResult::Failed));
+        info!("failed - next game");
+    }
 }
 
-fn update() {}
+fn update(
+    time: Res<Time>,
+    mut state: ResMut<RainState>,
+    player: Single<&Transform, With<TopDownMovementController>>,
+    umbrella: Single<&Transform, With<Umbrella>>,
+) {
+    let umbrella_dist = f32::abs(player.translation.x - umbrella.translation.x);
+    let sheltered = umbrella_dist < balance::SHELTER_THRESHOLD;
+
+    if !sheltered {
+        state.wetness += time.delta_secs() * balance::MAX_WET_TIME;
+    }
+}
