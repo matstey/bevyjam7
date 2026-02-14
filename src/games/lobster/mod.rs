@@ -13,7 +13,7 @@ use crate::{
     AppSystems, PausableSystems,
     asset_tracking::LoadResource,
     games::{
-        Game, GameControlMethod, GameInfo, GameResult, NextGame, GameData,
+        Game, GameControlMethod, GameData, GameInfo, GameResult, NextGame,
         camera::{self, shake::CameraShakeConfig},
     },
     screens::Screen,
@@ -204,7 +204,7 @@ pub fn spawn(
             &assets,
             Vec2 { x: 240.0, y: -90.0 },
             &mut texture_atlas_layouts,
-            open_time
+            open_time,
         ))
         .id();
 
