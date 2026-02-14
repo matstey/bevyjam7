@@ -16,6 +16,7 @@ mod example;
 mod lobster;
 mod popup;
 mod pre_game;
+mod rain;
 
 pub(super) fn plugin(app: &mut App) {
     app.load_resource::<GameAssets>();
@@ -38,6 +39,7 @@ pub(super) fn plugin(app: &mut App) {
         cat_bonk::plugin,
         popup::plugin,
         lobster::plugin,
+        rain::plugin,
     ));
 }
 
@@ -52,6 +54,7 @@ pub enum Game {
     CatBonk,
     Popup,
     Lobster,
+    Rain,
 }
 
 impl fmt::Display for Game {
@@ -68,6 +71,7 @@ impl fmt::Display for Game {
                 Game::CatBonk => "CatBonk",
                 Game::Popup => "Popup",
                 Game::Lobster => "Lobster",
+                Game::Rain => "Rain",
             }
         )
     }
@@ -272,7 +276,7 @@ pub fn spawn_first(
 ) {
     next_game.set(Game::Pre);
     next_game_state.set(GameState::PreGame(GameTransitionInfo {
-        next: get_info(Game::CatBonk),
+        next: get_info(Game::Rain),
         last: None,
     }));
 }
@@ -295,7 +299,8 @@ fn spawn_next(
             Game::Catch => Game::CatBonk,
             Game::CatBonk => Game::Popup,
             Game::Popup => Game::Lobster,
-            Game::Lobster => Game::CatBonk,
+            Game::Lobster => Game::Rain,
+            Game::Rain => Game::CatBonk,
             Game::Pre => todo!(), // If this get hit something has gone wrong
         };
 
@@ -323,5 +328,6 @@ const fn get_info(game: Game) -> GameInfo {
         Game::CatBonk => cat_bonk::get_info(),
         Game::Popup => popup::get_info(),
         Game::Lobster => lobster::get_info(),
+        Game::Rain => rain::get_info(),
     }
 }
