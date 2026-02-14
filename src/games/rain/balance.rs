@@ -9,4 +9,4 @@ pub const SHELTER_THRESHOLD: f32 = 22.0;
 
 pub const UMBRELLA_MAX_VELOCITY: f32 = 30.0;
 pub const PLAYER_MOVEMENT_SPEED: f32 = 42.0;
-pub const LEVEL_MULTIPLIER: f32 = 1.1;
+pub const LEVEL_MULTIPLIER: f32 = 1.07;
