@@ -5,6 +5,7 @@ use crate::games::rain::RainAssets;
 
 #[derive(Debug, Default, Component)]
 pub struct RandomMover {
+    max_speed: f32,
     velocity: f32,
     end_time: f32,
 }
@@ -12,13 +13,14 @@ pub struct RandomMover {
 #[derive(Component)]
 pub struct Umbrella;
 
-pub fn umbrella(assets: &RainAssets) -> impl Bundle {
+pub fn umbrella(assets: &RainAssets, max_speed: f32) -> impl Bundle {
     (
         Umbrella,
         Transform::from_xyz(0.0, -0.5, 10.0),
         Visibility::default(),
         Sprite::from_image(assets.umbrella.clone()),
         RandomMover {
+            max_speed,
             velocity: 0.0,
             end_time: 0.0,
         },
@@ -42,7 +44,7 @@ pub fn update(time: Res<Time>, mut query: Query<(&mut RandomMover, &mut Transfor
         if time.elapsed_secs() > mover.end_time {
             mover.end_time = time.elapsed_secs() + rng.random_range(0.5..1.5);
             mover.velocity =
-                rng.random_range(15.0..30.0) * f32::signum(rng.random_range(-1.0..1.0));
+                rng.random_range((mover.max_speed/2.0)..mover.max_speed) * f32::signum(rng.random_range(-1.0..1.0));
         }
 
         let new_x = transform.translation.x + (mover.velocity * time.delta_secs());

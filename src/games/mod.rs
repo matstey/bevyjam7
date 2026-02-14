@@ -128,6 +128,7 @@ pub struct GameData {
     pub elapsed: Duration,
     pub passed: usize,
     pub failed: usize,
+    pub level: u32,
 }
 
 impl Default for GameData {
@@ -138,6 +139,7 @@ impl Default for GameData {
             elapsed: Default::default(),
             passed: 0,
             failed: 0,
+            level: 1,
         }
     }
 }
@@ -156,6 +158,7 @@ impl GameData {
             }
         };
         self.elapsed += delta;
+        self.level = (self.round / balance::ROUNDS_PER_LEVEL) + 1;
     }
 
     fn adjust_health(&mut self, adjustment: f32) {
