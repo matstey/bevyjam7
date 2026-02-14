@@ -261,7 +261,11 @@ pub fn spawn(
             AnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)),
             children![
                 umbrella::umbrella(&assets, balance::UMBRELLA_MAX_VELOCITY * level_multiplier),
-                duck::duck(&assets, &mut texture_atlas_layouts, balance::PLAYER_MOVEMENT_SPEED * level_multiplier)
+                duck::duck(
+                    &assets,
+                    &mut texture_atlas_layouts,
+                    balance::PLAYER_MOVEMENT_SPEED * level_multiplier
+                )
             ],
         ))
         .id();

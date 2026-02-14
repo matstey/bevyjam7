@@ -43,8 +43,8 @@ pub fn update(time: Res<Time>, mut query: Query<(&mut RandomMover, &mut Transfor
     for (mut mover, mut transform) in &mut query {
         if time.elapsed_secs() > mover.end_time {
             mover.end_time = time.elapsed_secs() + rng.random_range(0.5..1.5);
-            mover.velocity =
-                rng.random_range((mover.max_speed/2.0)..mover.max_speed) * f32::signum(rng.random_range(-1.0..1.0));
+            mover.velocity = rng.random_range((mover.max_speed / 2.0)..mover.max_speed)
+                * f32::signum(rng.random_range(-1.0..1.0));
         }
 
         let new_x = transform.translation.x + (mover.velocity * time.delta_secs());
