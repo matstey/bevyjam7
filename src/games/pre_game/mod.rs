@@ -122,7 +122,7 @@ pub fn spawn(
                             )),
                             TimedImageChange {
                                 transition_time: time.elapsed() + Duration::from_millis(500),
-                                next: background_assets.from_index(data.round + data.random),
+                                next: background_assets.index(data.round + data.random),
                             },
                             ZIndex(-1),
                         ),

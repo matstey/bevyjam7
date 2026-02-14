@@ -22,7 +22,7 @@ pub fn spawn(
 ) {
     commands.spawn((
         widget::ui_root("Game Over"),
-        ImageNode::new(assets.from_index(data.random)),
+        ImageNode::new(assets.index(data.random)),
         DespawnOnExit(SCREEN),
         children![
             widget::header("Game Over"),

@@ -47,7 +47,7 @@ fn apply_interaction_palette_on_click_image(
         return;
     };
 
-    image.color = palette.pressed.into();
+    image.color = palette.pressed;
 }
 
 fn apply_interaction_palette_on_release(
@@ -69,7 +69,7 @@ fn apply_interaction_palette_on_release_image(
         return;
     };
 
-    image.color = palette.hovered.into();
+    image.color = palette.hovered;
 }
 
 fn apply_interaction_palette_on_over(
@@ -91,7 +91,7 @@ fn apply_interaction_palette_on_over_image(
         return;
     };
 
-    image.color = palette.hovered.into();
+    image.color = palette.hovered;
 }
 
 fn apply_interaction_palette_on_out(
@@ -113,7 +113,7 @@ fn apply_interaction_palette_on_out_image(
         return;
     };
 
-    image.color = palette.none.into();
+    image.color = palette.none;
 }
 
 #[derive(Resource, Asset, Clone, Reflect)]
