@@ -44,6 +44,13 @@ pub(super) fn plugin(app: &mut App) {
             .in_set(PausableSystems)
             .run_if(in_state(GAME)),
     );
+    app.add_systems(
+        Update,
+        (duck::trigger_step_sound_effect)
+            .in_set(AppSystems::TickTimers)
+            .in_set(PausableSystems)
+            .run_if(in_state(GAME)),
+    );
 
     // Register a basic data structure that we can use to track data for this game
     app.init_resource::<RainState>();
@@ -79,6 +86,8 @@ pub struct RainAssets {
     #[dependency]
     pub duck: Handle<Image>,
     #[dependency]
+    pub steps: Vec<Handle<AudioSource>>,
+    #[dependency]
     pub umbrella: Handle<Image>,
     #[dependency]
     pub rain: Handle<Image>,
@@ -97,6 +106,13 @@ impl FromWorld for RainAssets {
                     settings.sampler = ImageSampler::nearest();
                 },
             ),
+            steps: vec![
+                assets.load("games/rain/steps1.ogg"),
+                assets.load("games/rain/steps2.ogg"),
+                assets.load("games/rain/steps3.ogg"),
+                assets.load("games/rain/steps4.ogg"),
+                assets.load("games/rain/steps5.ogg"),
+            ],
             umbrella: assets.load_with_settings(
                 "games/rain/umbrella.png",
                 |settings: &mut ImageLoaderSettings| {

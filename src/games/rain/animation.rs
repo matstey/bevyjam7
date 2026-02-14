@@ -65,8 +65,8 @@ fn update_animation_atlas(mut query: Query<(&PlayerAnimation, &mut Sprite)>) {
 #[reflect(Component)]
 pub struct PlayerAnimation {
     timer: Timer,
-    frame: usize,
-    state: PlayerAnimationState,
+    pub frame: usize,
+    pub state: PlayerAnimationState,
 }
 
 #[derive(Reflect, PartialEq)]

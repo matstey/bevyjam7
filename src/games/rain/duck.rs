@@ -1,7 +1,12 @@
-use crate::{games::rain::animation::PlayerAnimation, movement::TopDownMovementController};
+use crate::{
+    games::rain::animation::{PlayerAnimation, PlayerAnimationState},
+    movement::TopDownMovementController,
+};
 use bevy::prelude::*;
 
+use crate::audio::sound_effect;
 use crate::games::rain::RainAssets;
+use rand::prelude::*;
 
 pub fn duck(
     assets: &RainAssets,
@@ -33,4 +38,21 @@ pub fn duck(
         },
         player_anim,
     )
+}
+
+pub fn trigger_step_sound_effect(
+    mut commands: Commands,
+    assets: If<Res<RainAssets>>,
+    mut step_query: Query<&PlayerAnimation>,
+) {
+    for animation in &mut step_query {
+        if animation.state == PlayerAnimationState::Walking
+            && animation.changed()
+            && (animation.frame == 2 || animation.frame == 5)
+        {
+            let rng = &mut rand::rng();
+            let random_step = assets.steps.choose(rng).unwrap().clone();
+            commands.spawn(sound_effect(random_step));
+        }
+    }
 }
