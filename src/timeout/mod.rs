@@ -56,7 +56,7 @@ impl Default for TimeoutBar {
     fn default() -> Self {
         Self {
             foreground_color: css::BLUE_VIOLET.into(),
-            background_color: Color::srgb(0.25, 0.25, 0.25),
+            background_color: Color::srgba(0.0, 0.0, 0.0, 0.0),
         }
     }
 }
@@ -138,9 +138,9 @@ fn update_bar(
         if let Ok(state) = timeout_query.get(parent.0) {
             let elapsed = time.elapsed() - state.start_time;
             let countdown = if elapsed < state.run_time {
-                elapsed.as_secs_f32().ceil() / state.run_time.as_secs_f32()
+                1.0 - (elapsed.as_secs_f32().floor() / state.run_time.as_secs_f32())
             } else {
-                0.0
+                1.0
             };
             bar.progress = countdown;
         }

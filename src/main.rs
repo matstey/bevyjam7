@@ -24,6 +24,7 @@ mod screens;
 mod theme;
 mod timeout;
 mod transition;
+mod visibility;
 
 use bevy::{
     app::HierarchyPropagatePlugin,
@@ -91,7 +92,7 @@ impl Plugin for AppPlugin {
             controls::plugin,
         ));
 
-        app.add_plugins(backgrounds::plugin);
+        app.add_plugins((backgrounds::plugin, visibility::plugin));
 
         // Order new `AppSystems` variants by adding them here:
         app.configure_sets(
