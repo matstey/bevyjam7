@@ -55,6 +55,8 @@ pub struct PreGameAssets {
     pass_background: Handle<Image>,
     #[dependency]
     fail_background: Handle<Image>,
+    #[dependency]
+    bgm: Handle<AudioSource>,
 }
 
 impl FromWorld for PreGameAssets {
@@ -64,6 +66,7 @@ impl FromWorld for PreGameAssets {
         Self {
             pass_background: assets.load("games/pre_game/pass.jpeg"),
             fail_background: assets.load("games/pre_game/fail.jpeg"),
+            bgm: assets.load("games/pre_game/bgm.ogg"),
         }
     }
 }
@@ -111,6 +114,7 @@ pub fn spawn(
                 DespawnOnExit(GAME), // When exiting this game despawn this entity
                 DespawnOnExit(Screen::Gameplay), // When exiting the top level game despawn this entity
                 Timeout::new(balance::COUNTDOWN),
+                AudioPlayer(game_assets.bgm.clone()),
                 children![(
                     layout::grid_parent(),
                     children![

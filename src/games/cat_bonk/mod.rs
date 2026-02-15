@@ -45,6 +45,8 @@ pub struct CatBonkAssets {
     cat_sounds: Vec<Handle<AudioSource>>,
     #[dependency]
     cat_hit_sounds: Vec<Handle<AudioSource>>,
+    #[dependency]
+    bgm: Handle<AudioSource>,
 }
 
 impl FromWorld for CatBonkAssets {
@@ -81,6 +83,7 @@ impl FromWorld for CatBonkAssets {
                 assets.load("games/cat/cat_hit2.ogg"),
                 assets.load("games/cat/cat_hit3.ogg"),
             ],
+            bgm: assets.load("games/cat/bgm.ogg"),
         }
     }
 }
@@ -197,6 +200,7 @@ pub fn spawn(
             DespawnOnExit(GAME),
             DespawnOnExit(Screen::Gameplay),
             Propagate(camera::RENDERLAYER_GAME),
+            AudioPlayer(assets.bgm.clone()),
         ))
         .add_children(&[level, weapon]);
 }

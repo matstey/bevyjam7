@@ -97,6 +97,8 @@ pub struct LobsterAssets {
     pub lobster_go: Handle<AudioSource>,
     #[dependency]
     pub background: Handle<Image>,
+    #[dependency]
+    pub bgm: Handle<AudioSource>,
 }
 
 impl FromWorld for LobsterAssets {
@@ -137,6 +139,7 @@ impl FromWorld for LobsterAssets {
                     settings.sampler = ImageSampler::nearest();
                 },
             ),
+            bgm: assets.load("games/lobster/bgm.ogg"),
         }
     }
 }
@@ -230,6 +233,7 @@ pub fn spawn(
             DespawnOnExit(GAME),
             DespawnOnExit(Screen::Gameplay),
             Propagate(camera::RENDERLAYER_GAME),
+            AudioPlayer(assets.bgm.clone()),
         ))
         .add_children(&[level, oyster, lobster]);
 

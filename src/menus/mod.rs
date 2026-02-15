@@ -29,6 +29,8 @@ pub enum Menu {
 pub struct MenuAssets {
     #[dependency]
     pub button: Handle<Image>,
+    #[dependency]
+    pub bgm: Handle<AudioSource>,
 }
 
 impl FromWorld for MenuAssets {
@@ -37,6 +39,7 @@ impl FromWorld for MenuAssets {
         let assets = world.resource::<AssetServer>();
         Self {
             button: assets.load("images/button.png"),
+            bgm: assets.load("audio/menu_bgm.ogg"),
         }
     }
 }

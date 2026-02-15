@@ -98,6 +98,8 @@ pub struct RainAssets {
     pub rain: Handle<Image>,
     #[dependency]
     pub ground: Handle<Image>,
+    #[dependency]
+    pub bgm: Handle<AudioSource>,
 }
 
 impl FromWorld for RainAssets {
@@ -142,6 +144,7 @@ impl FromWorld for RainAssets {
                     settings.sampler = ImageSampler::nearest();
                 },
             ),
+            bgm: assets.load("games/rain/bgm.ogg"),
         }
     }
 }
@@ -298,6 +301,7 @@ pub fn spawn(
             DespawnOnExit(GAME),
             DespawnOnExit(Screen::Gameplay),
             Propagate(camera::RENDERLAYER_GAME),
+            AudioPlayer(assets.bgm.clone()),
         ))
         .add_children(&[level, ground]);
 

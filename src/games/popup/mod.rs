@@ -82,6 +82,8 @@ pub struct PopupAssets {
     pub notify_sound: Handle<AudioSource>,
     #[dependency]
     pub close_sound: Handle<AudioSource>,
+    #[dependency]
+    pub bgm: Handle<AudioSource>,
 }
 
 impl FromWorld for PopupAssets {
@@ -153,6 +155,7 @@ impl FromWorld for PopupAssets {
             ),
             notify_sound: assets.load("games/popup/notify.ogg"),
             close_sound: assets.load("games/popup/close.ogg"),
+            bgm: assets.load("games/popup/bgm.ogg"),
         }
     }
 }
@@ -219,6 +222,7 @@ pub fn spawn(
             DespawnOnExit(GAME), // When exiting this game despawn this entity
             DespawnOnExit(Screen::Gameplay), // When exiting the top level game despawn this entity
             Timeout::new(balance::GAME_DURATION),
+            AudioPlayer(assets.bgm.clone()),
             children![TimeoutBar::from_foreground_color(color_u32(
                 get_info().color
             ))],
