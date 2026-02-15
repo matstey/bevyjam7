@@ -59,7 +59,7 @@ pub const fn get_info() -> GameInfo {
         kind: GAME,
         controls: GameControlMethod::Space,
         hint: "Grab",
-        color: 0x642327FF,
+        color: 0x8746D0FF,
     }
 }
 

@@ -50,7 +50,7 @@ pub const fn get_info() -> GameInfo {
         kind: GAME,
         controls: GameControlMethod::Mouse,
         hint: "Close",
-        color: 0x5555FFFF,
+        color: 0x000055FF,
     }
 }
 

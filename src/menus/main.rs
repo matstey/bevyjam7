@@ -19,6 +19,7 @@ fn spawn_main_menu(mut commands: Commands, assets: Res<MenuAssets>) {
         GlobalZIndex(2),
         DespawnOnExit(Menu::Main),
         AudioPlayer(assets.bgm.clone()),
+        PlaybackSettings::LOOP,
         #[cfg(not(target_family = "wasm"))]
         children![
             widget::header(app::NAME, assets.font.clone()),
