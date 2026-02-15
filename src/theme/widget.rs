@@ -31,22 +31,22 @@ pub fn ui_root(name: impl Into<Cow<'static, str>>) -> impl Bundle {
 }
 
 /// A simple header label. Bigger than [`label`].
-pub fn header(text: impl Into<String>) -> impl Bundle {
+pub fn header(text: impl Into<String>, font: Handle<Font>) -> impl Bundle {
     (
         Name::new("Header"),
         Text(text.into()),
-        TextFont::from_font_size(100.0),
+        TextFont::from(font.clone()).with_font_size(100.0),
         TextColor(HEADER_TEXT),
         TextShadow::default(),
         Floats,
     )
 }
 
-pub fn header_with_color(text: impl Into<String>, color: Color) -> impl Bundle {
+pub fn header_with_color(text: impl Into<String>, color: Color, font: Handle<Font>) -> impl Bundle {
     (
         Name::new("Header"),
         Text(text.into()),
-        TextFont::from_font_size(100.0),
+        TextFont::from(font.clone()).with_font_size(100.0),
         TextColor(color),
         TextShadow::default(),
         Floats,
@@ -54,11 +54,11 @@ pub fn header_with_color(text: impl Into<String>, color: Color) -> impl Bundle {
 }
 
 /// A simple text label.
-pub fn label(text: impl Into<String>) -> impl Bundle {
+pub fn label(text: impl Into<String>, font: Handle<Font>) -> impl Bundle {
     (
         Name::new("Label"),
         Text(text.into()),
-        TextFont::from_font_size(24.0),
+        TextFont::from(font.clone()).with_font_size(24.0),
         TextColor(LABEL_TEXT),
         Floats,
     )
@@ -68,6 +68,7 @@ pub fn image_button<E, B, M, I>(
     text: impl Into<String>,
     action: I,
     image: Handle<Image>,
+    font: Handle<Font>,
 ) -> impl Bundle
 where
     E: EntityEvent,
@@ -75,6 +76,7 @@ where
     I: IntoObserverSystem<E, B, M>,
 {
     let text = text.into();
+    //let font = Cow::new(font.clone());
     let action = IntoObserverSystem::into_system(action);
     (
         Name::new("Button"),
@@ -86,7 +88,7 @@ where
             ..default()
         },
         Floats,
-        Children::spawn(SpawnWith(|parent: &mut ChildSpawner| {
+        Children::spawn(SpawnWith(move |parent: &mut ChildSpawner| {
             parent
                 .spawn((
                     Name::new("Button Inner"),
@@ -107,7 +109,7 @@ where
                     children![(
                         Name::new("Button Text"),
                         Text(text),
-                        TextFont::from_font_size(24.0),
+                        TextFont::from(font.clone()).with_font_size(24.0),
                         TextColor(BUTTON_TEXT),
                         // Don't bubble picking events from the text up to the button.
                         Pickable::IGNORE,
@@ -119,7 +121,7 @@ where
 }
 
 /// A large rounded button with text and an action defined as an [`Observer`].
-pub fn button<E, B, M, I>(text: impl Into<String>, action: I) -> impl Bundle
+pub fn button<E, B, M, I>(text: impl Into<String>, action: I, font: Handle<Font>) -> impl Bundle
 where
     E: EntityEvent,
     B: Bundle,
@@ -136,11 +138,16 @@ where
             border_radius: BorderRadius::MAX,
             ..default()
         },
+        font,
     )
 }
 
 /// A small square button with text and an action defined as an [`Observer`].
-pub fn button_small<E, B, M, I>(text: impl Into<String>, action: I) -> impl Bundle
+pub fn button_small<E, B, M, I>(
+    text: impl Into<String>,
+    action: I,
+    font: Handle<Font>,
+) -> impl Bundle
 where
     E: EntityEvent,
     B: Bundle,
@@ -156,6 +163,7 @@ where
             justify_content: JustifyContent::Center,
             ..default()
         },
+        font,
     )
 }
 
@@ -164,6 +172,7 @@ fn button_base<E, B, M, I>(
     text: impl Into<String>,
     action: I,
     button_bundle: impl Bundle,
+    font: Handle<Font>,
 ) -> impl Bundle
 where
     E: EntityEvent,
@@ -176,7 +185,7 @@ where
         Name::new("Button"),
         Node::default(),
         Floats,
-        Children::spawn(SpawnWith(|parent: &mut ChildSpawner| {
+        Children::spawn(SpawnWith(move |parent: &mut ChildSpawner| {
             parent
                 .spawn((
                     Name::new("Button Inner"),
@@ -190,7 +199,7 @@ where
                     children![(
                         Name::new("Button Text"),
                         Text(text),
-                        TextFont::from_font_size(24.0),
+                        TextFont::from(font.clone()).with_font_size(24.0),
                         TextColor(BUTTON_TEXT),
                         // Don't bubble picking events from the text up to the button.
                         Pickable::IGNORE,

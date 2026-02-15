@@ -10,6 +10,7 @@ use crate::{
         pre_game::{GAME, balance},
     },
     layout,
+    menus::MenuAssets,
     theme::widget,
 };
 
@@ -27,7 +28,12 @@ pub(super) fn plugin(app: &mut App) {
     );
 }
 
-pub fn spawn(mut commands: Commands, game_state: Res<State<GameState>>, time: Res<Time>) {
+pub fn spawn(
+    mut commands: Commands,
+    game_state: Res<State<GameState>>,
+    time: Res<Time>,
+    menu_assets: Res<MenuAssets>,
+) {
     if let GameState::PreGame(game) = game_state.get() {
         info!("Hint spawn");
         commands.spawn((
@@ -36,7 +42,11 @@ pub fn spawn(mut commands: Commands, game_state: Res<State<GameState>>, time: Re
             ZIndex(2),
             children![(
                 layout::top_center(),
-                widget::header_with_color(game.next.hint, color_u32(game.next.color))
+                widget::header_with_color(
+                    game.next.hint,
+                    color_u32(game.next.color),
+                    menu_assets.font.clone()
+                )
             )],
             Hint {
                 display_time: time.elapsed() + balance::HINT_DISPLAY_TIME,

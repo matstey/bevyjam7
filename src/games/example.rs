@@ -6,6 +6,7 @@ use crate::{
     AppSystems, PausableSystems,
     asset_tracking::LoadResource,
     games::{Game, GameControlMethod, GameInfo, GameResult, NextGame},
+    menus::MenuAssets,
     screens::Screen,
     theme::widget,
     timeout::Timeout,
@@ -85,6 +86,7 @@ impl FromWorld for ExampleAssets {
 pub fn spawn(
     mut commands: Commands,
     _assets: Res<ExampleAssets>,
+    menu_assets: Res<MenuAssets>,
     mut state: ResMut<ExampleState>,
     time: Res<Time>,
 ) {
@@ -96,8 +98,11 @@ pub fn spawn(
         DespawnOnExit(Screen::Gameplay), // When exiting the top level game despawn this entity
         Timeout::default(),
         children![
-            widget::header("Example Game"),
-            (widget::label("0"), ExampleCountdown)
+            widget::header("Example Game", menu_assets.font.clone()),
+            (
+                widget::label("0", menu_assets.font.clone()),
+                ExampleCountdown
+            )
         ],
     ));
 }

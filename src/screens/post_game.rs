@@ -25,13 +25,14 @@ pub fn spawn(
         ImageNode::new(assets.index(data.random)),
         DespawnOnExit(SCREEN),
         children![
-            widget::header("Game Over"),
-            widget::label(format!("Passed: {}", data.passed)),
-            widget::label(format!("Failed: {}", data.failed)),
+            widget::header("Game Over", menu_assets.font.clone()),
+            widget::label(format!("Passed: {}", data.passed), menu_assets.font.clone()),
+            widget::label(format!("Failed: {}", data.failed), menu_assets.font.clone()),
             widget::image_button(
                 "Again?",
                 screens::enter_loading_or_gameplay_screen,
-                menu_assets.button.clone()
+                menu_assets.button.clone(),
+                menu_assets.font.clone()
             ),
         ],
     ));

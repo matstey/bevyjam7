@@ -20,14 +20,20 @@ fn spawn_main_menu(mut commands: Commands, assets: Res<MenuAssets>) {
         DespawnOnExit(Menu::Main),
         #[cfg(not(target_family = "wasm"))]
         children![
-            widget::header(app::NAME),
+            widget::header(app::NAME, assets.font.clone()),
             widget::image_button(
                 "Play",
                 screens::enter_loading_or_gameplay_screen,
-                assets.button.clone()
+                assets.button.clone(),
+                assets.font.clone()
             ),
-            widget::image_button("Settings", open_settings_menu, assets.button.clone()),
-            widget::image_button("Exit", exit_app, assets.button.clone()),
+            widget::image_button(
+                "Settings",
+                open_settings_menu,
+                assets.button.clone(),
+                assets.font.clone()
+            ),
+            widget::image_button("Exit", exit_app, assets.button.clone(), assets.font.clone()),
         ],
         #[cfg(target_family = "wasm")]
         children![
@@ -35,9 +41,15 @@ fn spawn_main_menu(mut commands: Commands, assets: Res<MenuAssets>) {
             widget::image_button(
                 "Play",
                 screens::enter_loading_or_gameplay_screen,
-                assets.button.clone()
+                assets.button.clone(),
+                assets.font.clone()
             ),
-            widget::image_button("Settings", open_settings_menu, assets.button.clone()),
+            widget::image_button(
+                "Settings",
+                open_settings_menu,
+                assets.button.clone(),
+                assets.font.clone()
+            ),
         ],
     ));
 }
