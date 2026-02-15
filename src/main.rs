@@ -67,7 +67,10 @@ impl Plugin for AppPlugin {
         load_internal_binary_asset!(
             app,
             TextFont::default().font,
-            "../assets/fonts/RockSalt-Regular.ttf",
+            concat!(
+                env!("CARGO_MANIFEST_DIR"),
+                "/assets/fonts/RockSalt-Regular.ttf"
+            ),
             |bytes: &[u8], _path: String| { Font::try_from_bytes(bytes.to_vec()).unwrap() }
         );
 
