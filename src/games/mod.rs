@@ -2,6 +2,7 @@ use std::{fmt, time::Duration};
 
 use bevy::prelude::*;
 use rand::Rng;
+use rand::seq::SliceRandom;
 
 use crate::screens::Screen;
 
@@ -118,7 +119,7 @@ impl fmt::Display for GameControlMethod {
 }
 
 /// Global game state updated after each game completes
-#[derive(Debug, Copy, Clone, Resource)]
+#[derive(Debug, Clone, Resource)]
 pub struct GameData {
     pub round: usize,
     pub elapsed: Duration,
@@ -126,6 +127,7 @@ pub struct GameData {
     pub failed: usize,
     pub level: usize,
     pub random: usize,
+    pub game_pool: Vec<Game>,
 }
 
 impl Default for GameData {
@@ -137,6 +139,7 @@ impl Default for GameData {
             failed: 0,
             level: 0,
             random: 0,
+            game_pool: Vec::new(),
         }
     }
 }
@@ -210,6 +213,24 @@ impl fmt::Display for GameResult {
     }
 }
 
+fn populate_game_pool(game_data: &mut ResMut<GameData>, current: Option<Game>) {
+    info!("refilling game pool");
+
+    let mut rng = rand::rng();
+    let mut games = vec![Game::CatBonk, Game::Popup, Game::Lobster, Game::Rain];
+    games.shuffle(&mut rng);
+
+    // make sure we don't have the same game we just played first in the pool
+    if let Some(last) = current
+        && games.last() == Some(&last)
+    {
+        info!("swapping repeat game in pool {}", last);
+        games.swap_remove(games.len() - 1);
+    }
+
+    game_data.game_pool = games;
+}
+
 /// A system that triggers the first game to spawn
 pub fn spawn_first(
     mut game_data: ResMut<GameData>,
@@ -234,19 +255,19 @@ fn spawn_next(
     mut next_game_state: ResMut<NextState<GameState>>,
     mut next_screen: ResMut<NextState<Screen>>,
 ) {
-    let current = *game.get(); // Store the current game so we only every transition once but still process all messages
+    let current = *game.get(); // Store the current game
     for game in rx.read() {
-        let next_game_kind = match current {
-            Game::None => Game::CatBonk,
-            Game::Example => Game::CatBonk,
-            Game::Catch => Game::CatBonk,
-            Game::CatBonk => Game::Popup,
-            Game::Popup => Game::Lobster,
-            Game::Lobster => Game::Rain,
-            Game::Rain => Game::CatBonk,
-            Game::Pre => todo!(), // If this get hit something has gone wrong
-        };
+        // If we already scheduled a state change, exit early
+        // so we only every transition once but still process all messages
+        if let NextState::Pending(pending_game) = *next_game && pending_game != Game::Pre {
+            continue;
+        }
 
+        if game_data.game_pool.is_empty() {
+            populate_game_pool(&mut game_data, Some(current));
+        }
+
+        let next_game_kind = game_data.game_pool.pop().unwrap();
         game_data.apply_result(game.result, Duration::from_secs(5)); // TODO: Actually time passed between games?
 
         if game_data.dead() {
