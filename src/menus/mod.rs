@@ -31,6 +31,8 @@ pub struct MenuAssets {
     pub button: Handle<Image>,
     #[dependency]
     pub bgm: Handle<AudioSource>,
+    #[dependency]
+    pub font: Handle<Font>,
 }
 
 impl FromWorld for MenuAssets {
@@ -40,6 +42,7 @@ impl FromWorld for MenuAssets {
         Self {
             button: assets.load("images/button.png"),
             bgm: assets.load("audio/menu_bgm.ogg"),
+            font: assets.load("fonts/RockSalt-Regular.ttf"),
         }
     }
 }

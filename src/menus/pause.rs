@@ -22,10 +22,25 @@ fn spawn_pause_menu(mut commands: Commands, assets: Res<MenuAssets>) {
         GlobalZIndex(2),
         DespawnOnExit(Menu::Pause),
         children![
-            widget::header("Game paused"),
-            widget::image_button("Continue", close_menu, assets.button.clone()),
-            widget::image_button("Settings", open_settings_menu, assets.button.clone()),
-            widget::image_button("Quit to title", quit_to_title, assets.button.clone()),
+            widget::header("Game paused", assets.font.clone()),
+            widget::image_button(
+                "Continue",
+                close_menu,
+                assets.button.clone(),
+                assets.font.clone()
+            ),
+            widget::image_button(
+                "Settings",
+                open_settings_menu,
+                assets.button.clone(),
+                assets.font.clone()
+            ),
+            widget::image_button(
+                "Quit to title",
+                quit_to_title,
+                assets.button.clone(),
+                assets.font.clone()
+            ),
         ],
     ));
 }

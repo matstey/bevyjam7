@@ -10,6 +10,7 @@ use crate::{
         pre_game::control_method::{ControlMethodAssets, control_method},
     },
     layout,
+    menus::MenuAssets,
     screens::Screen,
     theme::widget,
     timeout::{TimedOut, Timeout},
@@ -96,6 +97,7 @@ pub fn spawn(
     game_assets: Res<PreGameAssets>,
     background_assets: Res<BackgroundAssets>,
     data: Res<GameData>,
+    menu_assets: Res<MenuAssets>,
 ) {
     if let GameState::PreGame(info) = game_state.get() {
         state.reset(time.elapsed(), info.next);
@@ -140,7 +142,10 @@ pub fn spawn(
                         ),
                         (
                             layout::top_left(),
-                            children![widget::label(format!("{}", data.round))],
+                            children![widget::label(
+                                format!("{}", data.round),
+                                menu_assets.font.clone()
+                            )],
                         )
                     ],
                 )],
