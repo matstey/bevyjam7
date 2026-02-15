@@ -140,7 +140,7 @@ pub fn spawn(
     ];
 
     let mut rng = rand::rng();
-    let indices = index::sample(&mut rng, cat_spawns.len(), state.target_count as usize);
+    let indices = index::sample(&mut rng, cat_spawns.len(), state.target_count);
 
     commands.spawn((
         DespawnOnExit(GAME),             // When exiting this game despawn this entity

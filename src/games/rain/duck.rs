@@ -13,8 +13,6 @@ pub fn duck(
     texture_atlas_layouts: &mut Assets<TextureAtlasLayout>,
     max_speed: f32,
 ) -> impl Bundle {
-    let max_speed = max_speed;
-
     let layout = TextureAtlasLayout::from_grid(UVec2 { x: 32, y: 32 }, 3, 3, None, None);
     let texture_atlas_layout = texture_atlas_layouts.add(layout);
 
