@@ -5,6 +5,7 @@ use bevy::prelude::*;
 use crate::{
     asset_tracking::LoadResource,
     backgrounds::BackgroundAssets,
+    color::color_u32,
     games::{
         Game, GameData, GameInfo, GameResult, GameState,
         pre_game::control_method::{ControlMethodAssets, control_method},
@@ -142,9 +143,10 @@ pub fn spawn(
                         ),
                         (
                             layout::top_left(),
-                            children![widget::label(
+                            children![widget::header_with_color(
                                 format!("{}", data.round),
-                                menu_assets.font.clone()
+                                color_u32(info.next.color),
+                                menu_assets.font.clone(),
                             )],
                         )
                     ],

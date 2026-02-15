@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use duration_string::DurationString;
 
 use crate::{
     backgrounds::BackgroundAssets,
@@ -26,8 +27,18 @@ pub fn spawn(
         DespawnOnExit(SCREEN),
         children![
             widget::header("Game Over", menu_assets.font.clone()),
-            widget::label(format!("Passed: {}", data.passed), menu_assets.font.clone()),
-            widget::label(format!("Failed: {}", data.failed), menu_assets.font.clone()),
+            widget::label_with_shadow(
+                format!("Played for {}", DurationString::from(data.elapsed)),
+                menu_assets.font.clone()
+            ),
+            widget::label_with_shadow(
+                format!("Survived {} rounds", data.round),
+                menu_assets.font.clone()
+            ),
+            widget::label_with_shadow(
+                format!("Passed {} and failed {} games", data.passed, data.failed),
+                menu_assets.font.clone()
+            ),
             widget::image_button(
                 "Again?",
                 screens::enter_loading_or_gameplay_screen,

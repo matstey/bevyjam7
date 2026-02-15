@@ -64,6 +64,20 @@ pub fn label(text: impl Into<String>, font: Handle<Font>) -> impl Bundle {
     )
 }
 
+pub fn label_with_shadow(text: impl Into<String>, font: Handle<Font>) -> impl Bundle {
+    (
+        Name::new("Label"),
+        Text(text.into()),
+        TextFont::from(font.clone()).with_font_size(35.0),
+        TextColor(LABEL_TEXT),
+        TextShadow {
+            offset: Vec2::splat(2.0),
+            ..default()
+        },
+        Floats,
+    )
+}
+
 pub fn image_button<E, B, M, I>(
     text: impl Into<String>,
     action: I,
