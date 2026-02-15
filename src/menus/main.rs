@@ -37,7 +37,7 @@ fn spawn_main_menu(mut commands: Commands, assets: Res<MenuAssets>) {
         ],
         #[cfg(target_family = "wasm")]
         children![
-            widget::header(app::NAME),
+            widget::header(app::NAME, assets.font.clone()),
             widget::image_button(
                 "Play",
                 screens::enter_loading_or_gameplay_screen,
