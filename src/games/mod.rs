@@ -162,12 +162,7 @@ impl GameData {
 
     pub fn fever_grade(&self) -> f32 {
         // 0.0 -> MAX_FEVER
-        (if self.passed == 0 {
-            self.failed as f32
-        } else {
-            self.failed as f32 / self.passed as f32
-        })
-        .clamp(0.0, balance::MAX_FEVER)
+        (self.failed as f32).clamp(0.0, balance::MAX_FEVER)
     }
 
     pub fn fever_grade_nominal(&self) -> f32 {
