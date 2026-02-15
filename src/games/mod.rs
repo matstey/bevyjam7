@@ -9,7 +9,6 @@ mod balance;
 mod camera;
 mod cat_bonk;
 mod catch;
-mod duck;
 mod example;
 mod lobster;
 mod popup;
@@ -29,7 +28,6 @@ pub(super) fn plugin(app: &mut App) {
         camera::plugin,
         pre_game::plugin,
         example::plugin,
-        duck::plugin,
         catch::plugin,
         cat_bonk::plugin,
         popup::plugin,
@@ -44,7 +42,6 @@ pub enum Game {
     None,
     Pre,
     Example,
-    Duck,
     Catch,
     CatBonk,
     Popup,
@@ -61,7 +58,6 @@ impl fmt::Display for Game {
                 Game::None => "None",
                 Game::Pre => "PreGame",
                 Game::Example => "Example",
-                Game::Duck => "Duck",
                 Game::Catch => "Catch",
                 Game::CatBonk => "CatBonk",
                 Game::Popup => "Popup",
@@ -243,7 +239,6 @@ fn spawn_next(
         let next_game_kind = match current {
             Game::None => Game::CatBonk,
             Game::Example => Game::CatBonk,
-            Game::Duck => Game::Example,
             Game::Catch => Game::CatBonk,
             Game::CatBonk => Game::Popup,
             Game::Popup => Game::Lobster,
@@ -277,7 +272,6 @@ const fn get_info(game: Game) -> GameInfo {
         Game::None => todo!(),
         Game::Pre => todo!(), // If this get hit something has gone wrong
         Game::Example => example::get_info(),
-        Game::Duck => duck::get_info(),
         Game::Catch => catch::get_info(),
         Game::CatBonk => cat_bonk::get_info(),
         Game::Popup => popup::get_info(),

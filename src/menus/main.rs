@@ -4,6 +4,7 @@ use bevy::prelude::*;
 
 use crate::{
     app,
+    audio::music,
     menus::{Menu, MenuAssets},
     screens::{self},
     theme::widget,
@@ -18,8 +19,7 @@ fn spawn_main_menu(mut commands: Commands, assets: Res<MenuAssets>) {
         widget::ui_root("Main Menu"),
         GlobalZIndex(2),
         DespawnOnExit(Menu::Main),
-        AudioPlayer(assets.bgm.clone()),
-        PlaybackSettings::LOOP,
+        music(assets.bgm.clone()),
         #[cfg(not(target_family = "wasm"))]
         children![
             widget::header(app::NAME, assets.font.clone()),
