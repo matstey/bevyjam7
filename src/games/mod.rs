@@ -259,7 +259,9 @@ fn spawn_next(
     for game in rx.read() {
         // If we already scheduled a state change, exit early
         // so we only every transition once but still process all messages
-        if let NextState::Pending(pending_game) = *next_game && pending_game != Game::Pre {
+        if let NextState::Pending(pending_game) = *next_game
+            && pending_game != Game::Pre
+        {
             continue;
         }
 
